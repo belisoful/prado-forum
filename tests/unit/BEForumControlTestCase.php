@@ -13,7 +13,13 @@ use Prado\IO\TTextWriter;
 use Prado\Prado;
 use Prado\Web\Services\TPageService;
 use Prado\Web\TAssetManager;
+use Prado\Exceptions\TExitException;
+use Prado\IO\IDataRenderer;
+use Prado\Web\UI\TCommandEventParameter;
+use Prado\Web\UI\TControl;
 use Prado\Web\UI\THtmlWriter;
+use Prado\Web\UI\WebControls\TRepeater;
+use Prado\Web\UI\WebControls\TRepeaterCommandEventParameter;
 use Prado\Web\UI\TForm;
 use Prado\Web\UI\TPage;
 use Prado\Web\UI\WebControls\THead;
@@ -54,6 +60,8 @@ abstract class BEForumControlTestCase extends BEForumTestCase
 		$service->setID('page');
 		$app->setService($service);
 		$service->init(null);
+		// redirects inspect the server software; the CLI has none
+		$_SERVER['SERVER_SOFTWARE'] ??= 'PHPUnit';
 	}
 
 	/**
@@ -113,6 +121,72 @@ abstract class BEForumControlTestCase extends BEForumTestCase
 		$textWriter = new TTextWriter();
 		$page->run(new THtmlWriter($textWriter));
 		return $textWriter->flush();
+	}
+
+	/**
+	 * Renders a control through the page lifecycle and then invokes a postback
+	 * handler on it, the way PRADO would after restoring the control tree.
+	 * Redirects (`TExitException`) end the handler and are returned.
+	 * @param BEForumControl $control the control
+	 * @param callable $action `function(BEForumControl $control): void` invoking the handler
+	 * @param array<string, mixed> $params the request parameters
+	 * @return null|TExitException the redirect, null when the handler returned normally
+	 */
+	protected function postback(BEForumControl $control, callable $action, array $params = []): ?TExitException
+	{
+		$this->render($control, $params);
+		return $this->invoke($control, $action);
+	}
+
+	/**
+	 * Invokes a handler on an already rendered control.
+	 * @param BEForumControl $control the control
+	 * @param callable $action `function(BEForumControl $control): void` invoking the handler
+	 * @return null|TExitException the redirect, null when the handler returned normally
+	 */
+	protected function invoke(TControl $control, callable $action): ?TExitException
+	{
+		// PRADO validates the page before raising a postback event
+		$page = $control->getPage();
+		if ($page !== null) {
+			$page->validate();
+		}
+		try {
+			$action($control);
+		} catch (TExitException $e) {
+			return $e;
+		}
+		return null;
+	}
+
+	/**
+	 * Builds a repeater command event parameter.
+	 * @param string $name the command name
+	 * @param mixed $parameter the command parameter
+	 * @param null|TControl $item the repeater item
+	 * @return TRepeaterCommandEventParameter the parameter
+	 */
+	protected function command(string $name, $parameter = null, ?TControl $item = null): TRepeaterCommandEventParameter
+	{
+		return new TRepeaterCommandEventParameter($item, null, new TCommandEventParameter($name, $parameter));
+	}
+
+	/**
+	 * Finds the repeater item whose data row has a value.
+	 * @param TRepeater $repeater the repeater
+	 * @param string $key the row key
+	 * @param mixed $value the value
+	 * @return TControl the item
+	 */
+	protected function itemWhere(TRepeater $repeater, string $key, $value): TControl
+	{
+		foreach ($repeater->getItems() as $item) {
+			$data = $item instanceof IDataRenderer || method_exists($item, 'getData') ? $item->getData() : null;
+			if (is_array($data) && ($data[$key] ?? null) === $value) {
+				return $item;
+			}
+		}
+		self::fail('no repeater item with ' . $key . ' = ' . var_export($value, true));
 	}
 
 	/**

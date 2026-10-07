@@ -165,7 +165,7 @@ class BEForumProfileEditor extends BEForumControl
 			foreach (array_keys($this->getNotificationOptions()) as $key) {
 				$member->setSetting($key, in_array($key, $selected, true) ? null : false);
 			}
-			$member->save();
+			$members->saveSettings($member);
 		});
 		if ($saved) {
 			$this->Saved->setVisible(true);

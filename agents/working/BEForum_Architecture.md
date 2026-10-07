@@ -40,3 +40,4 @@
 - `canUser(null, ...)` is a guest (`BEForumGuestUser`) in web requests; only the shell is allow-all.
 - `fxGetCronTaskInfos` returns a single `TCronTaskInfo` (TCronModule expects one per handler).
 - Attachments store the detected MIME type, require edit rights on the post, send `X-Content-Type-Options: nosniff` and never display SVG inline.
+- Postback handlers are tested by `tests/unit/Web/BEForumPostbackTest.php`: `BEForumControlTestCase::render()` builds the tree through the page lifecycle, `invoke()` validates the page and calls the handler (a redirect surfaces as the returned `TExitException`), `command()` builds repeater command parameters and `itemWhere()` finds rendered repeater items by row data.

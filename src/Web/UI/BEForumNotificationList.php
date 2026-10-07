@@ -12,6 +12,7 @@ namespace Belisoful\Forum\Web\UI;
 
 use Belisoful\Forum\Data\BEForumNotification;
 use Belisoful\Forum\Security\BEForumPermissions;
+use Belisoful\Forum\Web\BEForumUrlBuilder;
 use Prado\TPropertyValue;
 use Prado\Web\UI\WebControls\TRepeaterCommandEventParameter;
 
@@ -181,7 +182,7 @@ class BEForumNotificationList extends BEForumControl
 		$this->bindRepeater('Rows', $this->buildRows($notifications));
 		$this->Pager->setPagination($pagination);
 		$urls = $this->getUrls();
-		$this->Pager->setUrlCallback(fn (int $p) => $urls->build($urls->getPagePath('notifications'), ['unread' => $this->getUnreadOnly() ? 1 : null, 'page' => $p > 1 ? $p : null]));
+		$this->Pager->setUrlCallback(fn (int $p) => $urls->build($urls->getPagePath('notifications'), ['unread' => $this->getUnreadOnly() ? 1 : null, BEForumUrlBuilder::PARAM_PAGE => $p > 1 ? $p : null]));
 		$this->UnreadLink->setNavigateUrl($urls->build($urls->getPagePath('notifications'), ['unread' => $this->getUnreadOnly() ? null : 1]));
 		$this->UnreadLink->setText($this->te($this->getUnreadOnly() ? 'Show all' : 'Show unread only'));
 		$this->MarkAll->setVisible($this->getForum()->getNotifications()->countUnread() > 0);

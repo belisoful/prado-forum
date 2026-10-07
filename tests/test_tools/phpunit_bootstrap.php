@@ -23,4 +23,7 @@ require_once(__DIR__ . '/../unit/BEForumControlTestCase.php');
 if (\Prado\Prado::getApplication() === null) {
 	$app = new \Prado\TApplication(__DIR__ . '/../app', false);
 	$app->setMode(\Prado\TApplicationMode::Debug);
+	// the response starts its output buffer when first created; create it here so that
+	// no single test is blamed for the buffer level change
+	$app->getResponse();
 }
