@@ -1,0 +1,6 @@
+<com:TContent ID=<%$ PluginContentId %>>
+	<com:Belisoful\Forum\Web\UI\BEForumToolbar />
+	<com:Belisoful\Forum\Web\UI\BEForumBreadcrumbs />
+	<h1 class="beforum-page-title"><%= htmlspecialchars((string) $this->Request["tag"]) %></h1>
+	<com:Belisoful\Forum\Web\UI\BEForumThreadList TagSlug=<%= $this->Request["tag"] %> ShowBoard="true" />
+</com:TContent>

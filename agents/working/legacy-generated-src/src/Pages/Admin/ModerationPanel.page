@@ -1,0 +1,197 @@
+<%@ Page Language="PHP" Title="Moderation Panel" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%=$this->Title%></title>
+  <style>
+    body{font-family:sans-serif;margin:0;background:#f5f5f5;color:#222}
+    .modpanel{max-width:1100px;margin:0 auto;padding:1.5rem}
+    .modpanel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+    .modpanel-header h1{margin:0;font-size:1.4rem}
+    .modpanel-nav{display:flex;gap:.25rem;margin-bottom:1.5rem;border-bottom:2px solid #ddd}
+    .modpanel-nav a{padding:.5rem 1rem;text-decoration:none;color:#555;font-size:.9rem;border-bottom:3px solid transparent;margin-bottom:-2px}
+    .modpanel-nav a:hover{color:#000}
+    .modpanel-nav a.active{color:#1a1a2e;border-bottom-color:#1a1a2e;font-weight:600}
+    .modpanel-card{background:#fff;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:1.5rem}
+    .modpanel-card__head{padding:.75rem 1rem;border-bottom:1px solid #eee;font-weight:600;display:flex;align-items:center;justify-content:space-between}
+    .modpanel-card__body{padding:1rem}
+    table.modpanel-table{width:100%;border-collapse:collapse;font-size:.875rem}
+    table.modpanel-table th{text-align:left;padding:.5rem .75rem;background:#f0f0f0;font-weight:600}
+    table.modpanel-table td{padding:.5rem .75rem;border-top:1px solid #eee;vertical-align:top}
+    .modpanel-post-preview{font-size:.85rem;color:#444;max-width:340px;line-height:1.4}
+    .modpanel-actions{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center}
+    .btn{display:inline-block;padding:.3rem .75rem;border-radius:4px;font-size:.8rem;font-weight:600;cursor:pointer;text-decoration:none;border:none;line-height:1.4}
+    .btn-primary{background:#1a1a2e;color:#fff}
+    .btn-success{background:#1e8449;color:#fff}
+    .btn-danger{background:#c0392b;color:#fff}
+    .btn-warn{background:#e67e22;color:#fff}
+    .btn-neutral{background:#95a5a6;color:#fff}
+    .badge{display:inline-block;padding:.15rem .5rem;border-radius:3px;font-size:.75rem;font-weight:600}
+    .badge-info{background:#d6eaf8;color:#1a5276}
+    .badge-warn{background:#fdebd0;color:#784212}
+    .badge-danger{background:#fadbd8;color:#7b241c}
+    .badge-success{background:#d5f5e3;color:#1e8449}
+    .reason-form{display:inline}
+    .modpanel-empty{color:#888;padding:.5rem 0}
+  </style>
+</head>
+<body>
+<div class="modpanel">
+
+  <div class="modpanel-header">
+    <h1>🛡 Moderation Panel</h1>
+    <div style="display:flex;gap:.5rem">
+      <a href="<%=$this->getAdminUrl('dashboard')%>" class="btn btn-neutral">Admin Dashboard</a>
+      <a href="<%=$this->getForumManager()->createUrl('forum/ForumHome')%>" class="btn btn-neutral">← Forum</a>
+    </div>
+  </div>
+
+  <!-- Queue tabs -->
+  <nav class="modpanel-nav">
+    <a href="<%=$this->getQueueUrl('pending')%>"  class="<%=$this->getQueue()==='pending'?  'active':''%>">⏳ Pending</a>
+    <a href="<%=$this->getQueueUrl('spam')%>"     class="<%=$this->getQueue()==='spam'?     'active':''%>">🚫 Spam</a>
+    <a href="<%=$this->getQueueUrl('reported')%>" class="<%=$this->getQueue()==='reported'? 'active':''%>">⚠️ Reported</a>
+  </nav>
+
+  <!-- Post queue -->
+  <div class="modpanel-card">
+    <div class="modpanel-card__head">
+      <span>
+        <% if ($this->getQueue() === 'pending'): %>⏳ Pending Approval
+        <% elseif ($this->getQueue() === 'spam'): %>🚫 Spam-Flagged
+        <% else: %>⚠️ Reported Posts
+        <% endif; %>
+        &nbsp;<span class="badge badge-info"><%=$this->getTotalCount()%></span>
+      </span>
+    </div>
+    <div class="modpanel-card__body">
+      <% if (empty($this->getPosts())): %>
+      <p class="modpanel-empty">Nothing in this queue. 🎉</p>
+      <% else: %>
+      <table class="modpanel-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Author</th>
+            <th>Thread</th>
+            <th>Content Preview</th>
+            <th>Posted</th>
+            <% if ($this->getQueue() === 'spam'): %><th>Score</th><% endif; %>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        <% foreach ($this->getPosts() as $post): %>
+        <tr>
+          <td style="color:#999;white-space:nowrap"><%=(int)$post->id%></td>
+          <td style="white-space:nowrap">
+            <strong><%=htmlspecialchars($post->author ? $post->author->username : '—')%></strong>
+            <% if ($post->author && $post->author->warn_count > 0): %>
+            <div><span class="badge badge-warn"><%=(int)$post->author->warn_count%> warns</span></div>
+            <% endif; %>
+          </td>
+          <td style="white-space:nowrap">
+            <a href="<%=$this->getThreadUrl($post->thread_id)%>" target="_blank">
+              #<%=(int)$post->thread_id%>
+              <% if ($post->thread): %>
+              <div style="font-size:.8rem;color:#888;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                <%=htmlspecialchars(mb_strimwidth($post->thread->title??'',0,40,'…'))%>
+              </div>
+              <% endif; %>
+            </a>
+          </td>
+          <td>
+            <div class="modpanel-post-preview">
+              <%=htmlspecialchars(mb_strimwidth(strip_tags($post->content_html ?? $post->content_raw ?? ''), 0, 200, '…'))%>
+            </div>
+            <% if ($post->content_raw && strlen($post->content_raw) > 200): %>
+            <a href="<%=$this->getPostUrl($post->id)%>" target="_blank" style="font-size:.8rem">View full post ↗</a>
+            <% endif; %>
+          </td>
+          <td style="white-space:nowrap;color:#888;font-size:.8rem">
+            <%=htmlspecialchars(date('M j, Y', strtotime($post->created_at)))%><br>
+            <%=htmlspecialchars(date('H:i', strtotime($post->created_at)))%>
+          </td>
+          <% if ($this->getQueue() === 'spam'): %>
+          <td><span class="badge badge-danger"><%=(int)$post->spam_score%></span></td>
+          <% endif; %>
+          <td>
+            <div class="modpanel-actions">
+              <!-- Approve -->
+              <% if ($this->getQueue() !== 'spam'): %>
+              <form method="post" action="<%=$this->getQueueUrl($this->getQueue())%>" style="display:inline">
+                <input type="hidden" name="post_id" value="<%=(int)$post->id%>">
+                <com:TButton Text="✓ Approve" OnClick="approvePost" CssClass="btn btn-success" />
+              </form>
+              <% endif; %>
+
+              <!-- Clear spam -->
+              <% if ($this->getQueue() === 'spam'): %>
+              <form method="post" action="<%=$this->getQueueUrl($this->getQueue())%>" style="display:inline">
+                <input type="hidden" name="post_id" value="<%=(int)$post->id%>">
+                <com:TButton Text="Not Spam" OnClick="clearSpam" CssClass="btn btn-success" />
+              </form>
+              <% else: %>
+              <form method="post" action="<%=$this->getQueueUrl($this->getQueue())%>" style="display:inline">
+                <input type="hidden" name="post_id" value="<%=(int)$post->id%>">
+                <com:TButton Text="Spam" OnClick="markSpam" CssClass="btn btn-warn" />
+              </form>
+              <% endif; %>
+
+              <!-- Delete (reject) -->
+              <form method="post" action="<%=$this->getQueueUrl($this->getQueue())%>" style="display:inline"
+                    onsubmit="return confirm('Delete this post?')">
+                <input type="hidden" name="post_id" value="<%=(int)$post->id%>">
+                <input type="hidden" name="reason" value="">
+                <com:TButton Text="✗ Delete" OnClick="rejectPost" CssClass="btn btn-danger" />
+              </form>
+
+              <!-- Warn author -->
+              <% if ($post->author): %>
+              <form method="post" action="<%=$this->getQueueUrl($this->getQueue())%>" style="display:inline"
+                    onsubmit="return confirm('Warn user <%=addslashes(htmlspecialchars($post->author->username))%>?')">
+                <input type="hidden" name="post_id" value="<%=(int)$post->id%>">
+                <input type="hidden" name="warn_user_id" value="<%=(int)$post->author->id%>">
+                <input type="hidden" name="reason" value="Warning related to post #<%=(int)$post->id%>">
+                <com:TButton Text="Warn User" OnClick="warnUser" CssClass="btn btn-neutral" />
+              </form>
+              <% endif; %>
+            </div>
+          </td>
+        </tr>
+        <% endforeach; %>
+        </tbody>
+      </table>
+      <% endif; %>
+    </div>
+  </div>
+
+  <!-- My recent actions -->
+  <div class="modpanel-card">
+    <div class="modpanel-card__head">My Recent Actions</div>
+    <div class="modpanel-card__body">
+      <% if (empty($this->getMyLog())): %>
+      <p class="modpanel-empty">No recent actions.</p>
+      <% else: %>
+      <table class="modpanel-table">
+        <thead><tr><th>When</th><th>Action</th><th>Target</th><th>Reason</th></tr></thead>
+        <tbody>
+        <% foreach ($this->getMyLog() as $entry): %>
+        <tr>
+          <td style="white-space:nowrap;color:#888"><%=htmlspecialchars(date('M j H:i', strtotime($entry->created_at)))%></td>
+          <td><span class="badge badge-info"><%=htmlspecialchars($entry->action_type)%></span></td>
+          <td><%=htmlspecialchars($entry->target_type)%> #<%=(int)$entry->target_id%></td>
+          <td style="color:#555;font-size:.85rem"><%=htmlspecialchars(mb_strimwidth($entry->reason??'', 0, 80, '…'))%></td>
+        </tr>
+        <% endforeach; %>
+        </tbody>
+      </table>
+      <% endif; %>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

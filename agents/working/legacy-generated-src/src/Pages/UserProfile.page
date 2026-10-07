@@ -1,0 +1,158 @@
+<%@ Page Language="PHP" Title="User Profile" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%=$this->Title%></title>
+</head>
+<body class="forum-page forum-page--profile">
+
+<header class="forum-header">
+  <div class="forum-header__inner">
+    <h1 class="forum-header__title">
+      <a href="<%=$this->getForumManager()->createUrl('forum/ForumHome')%>">
+        <%=htmlspecialchars($this->getForumManager()->getSiteName())%>
+      </a>
+    </h1>
+    <com:TForumSearch ID="HeaderSearch" ModuleID="forum" />
+  </div>
+</header>
+
+<main class="forum-main">
+  <% if ($this->getProfile()): %>
+  <% $p = $this->getProfile(); %>
+
+  <div class="forum-profile">
+    <div class="forum-profile__header">
+      <% if ($p->avatar_url): %>
+      <img class="forum-profile__avatar" src="<%=htmlspecialchars($p->avatar_url)%>" alt="" width="96" height="96">
+      <% else: %>
+      <div class="forum-profile__avatar forum-profile__avatar--default" aria-hidden="true">👤</div>
+      <% endif; %>
+
+      <div class="forum-profile__identity">
+        <h2 class="forum-profile__name"><%=htmlspecialchars($p->getEffectiveDisplayName())%></h2>
+        <% if ($p->display_name && $p->display_name !== $p->username): %>
+        <span class="forum-profile__username">@<%=htmlspecialchars($p->username)%></span>
+        <% endif; %>
+        <% if ($p->location): %>
+        <span class="forum-profile__location">📍 <%=htmlspecialchars($p->location)%></span>
+        <% endif; %>
+        <% if ($p->website): %>
+        <a class="forum-profile__website" href="<%=htmlspecialchars($p->website)%>" rel="nofollow noopener" target="_blank">
+          🔗 <%=htmlspecialchars($p->website)%>
+        </a>
+        <% endif; %>
+      </div>
+
+      <div class="forum-profile__stats">
+        <div class="forum-profile__stat"><strong><%=(int)$p->post_count%></strong> Posts</div>
+        <div class="forum-profile__stat"><strong><%=(int)$p->thread_count%></strong> Threads</div>
+        <% if ($this->getForumManager()->getReputationEnabled()): %>
+        <div class="forum-profile__stat"><strong><%=(int)$p->reputation_points%></strong> Rep</div>
+        <% endif; %>
+      </div>
+    </div>
+
+    <nav class="forum-profile__tabs">
+      <a href="<%=$this->getTabUrl('about')%>"   class="forum-profile__tab<%=$this->getActiveTab()==='about'?   ' forum-profile__tab--active':''%>">About</a>
+      <a href="<%=$this->getTabUrl('posts')%>"   class="forum-profile__tab<%=$this->getActiveTab()==='posts'?   ' forum-profile__tab--active':''%>">Posts</a>
+      <a href="<%=$this->getTabUrl('threads')%>" class="forum-profile__tab<%=$this->getActiveTab()==='threads'? ' forum-profile__tab--active':''%>">Threads</a>
+      <% if ($this->getForumManager()->getBadgesEnabled()): %>
+      <a href="<%=$this->getTabUrl('badges')%>"  class="forum-profile__tab<%=$this->getActiveTab()==='badges'?  ' forum-profile__tab--active':''%>">Badges</a>
+      <% endif; %>
+    </nav>
+
+    <div class="forum-profile__tab-content">
+
+      <% if ($this->getActiveTab() === 'about'): %>
+      <div class="forum-profile__about">
+        <% if ($p->bio): %><p class="forum-profile__bio"><%=htmlspecialchars($p->bio)%></p><% endif; %>
+        <dl class="forum-profile__details">
+          <dt>Joined</dt><dd><%=htmlspecialchars(date('F j, Y', strtotime($p->created_at)))%></dd>
+          <% if ($p->last_seen_at): %>
+          <dt>Last seen</dt><dd><%=htmlspecialchars(date('F j, Y', strtotime($p->last_seen_at)))%></dd>
+          <% endif; %>
+        </dl>
+        <% if ($p->signature && $this->getForumManager()->getEnableSignatures()): %>
+        <div class="forum-profile__signature">
+          <h3>Signature</h3>
+          <p><%=htmlspecialchars($p->signature)%></p>
+        </div>
+        <% endif; %>
+      </div>
+
+      <% elseif ($this->getActiveTab() === 'posts'): %>
+      <div class="forum-profile__posts">
+        <% $posts = $this->getTabData()['posts'] ?? []; %>
+        <% if (empty($posts)): %>
+        <p class="forum-empty">No posts yet.</p>
+        <% else: %>
+        <ul class="forum-profile__post-list">
+          <% foreach ($posts as $post): %>
+          <li class="forum-profile__post-item">
+            <a href="<%=$this->getPostUrl($post->id)%>">Post in thread #<%=(int)$post->thread_id%></a>
+            <span class="forum-profile__post-date"><%=htmlspecialchars(date('M j, Y', strtotime($post->created_at)))%></span>
+          </li>
+          <% endforeach; %>
+        </ul>
+        <% endif; %>
+      </div>
+
+      <% elseif ($this->getActiveTab() === 'threads'): %>
+      <div class="forum-profile__threads">
+        <% $threads = $this->getTabData()['threads'] ?? []; %>
+        <% if (empty($threads)): %>
+        <p class="forum-empty">No threads started yet.</p>
+        <% else: %>
+        <ul class="forum-profile__thread-list">
+          <% foreach ($threads as $thread): %>
+          <li class="forum-profile__thread-item">
+            <a href="<%=$this->getThreadUrl($thread->id)%>"><%=htmlspecialchars($thread->title)%></a>
+            <span class="forum-profile__thread-meta">
+              <%=(int)$thread->reply_count%> replies &middot;
+              <%=htmlspecialchars(date('M j, Y', strtotime($thread->created_at)))%>
+            </span>
+          </li>
+          <% endforeach; %>
+        </ul>
+        <% endif; %>
+      </div>
+
+      <% elseif ($this->getActiveTab() === 'badges'): %>
+      <div class="forum-profile__badges">
+        <% $userBadges = $this->getTabData()['badges'] ?? []; %>
+        <% if (empty($userBadges)): %>
+        <p class="forum-empty">No badges earned yet.</p>
+        <% else: %>
+        <ul class="forum-badge-list">
+          <% foreach ($userBadges as $ub): %>
+          <% $badge = $ub->badge; %>
+          <% if (!$badge) continue; %>
+          <li class="forum-badge-item" title="<%=htmlspecialchars($badge->description??'')%>">
+            <% if ($badge->icon_url): %>
+            <img src="<%=htmlspecialchars($badge->icon_url)%>" alt="" width="32" height="32">
+            <% endif; %>
+            <span class="forum-badge-item__name"><%=htmlspecialchars($badge->name)%></span>
+            <span class="forum-badge-item__date"><%=htmlspecialchars(date('M Y', strtotime($ub->awarded_at)))%></span>
+          </li>
+          <% endforeach; %>
+        </ul>
+        <% endif; %>
+      </div>
+      <% endif; %>
+
+    </div>
+  </div>
+
+  <% else: %>
+  <p class="forum-error">User profile not found.</p>
+  <% endif; %>
+</main>
+
+<footer class="forum-footer">
+  <p>&copy; <%=date('Y')%> <%=htmlspecialchars($this->getForumManager()->getSiteName())%></p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<com:TContent ID=<%$ PluginContentId %>>
+	<com:Belisoful\Forum\Web\UI\BEForumToolbar />
+	<div class="beforum-layout">
+		<main class="beforum-main">
+			<com:Belisoful\Forum\Web\UI\BEForumCategoryList />
+		</main>
+		<aside class="beforum-sidebar">
+			<com:Belisoful\Forum\Web\UI\BEForumStatistics />
+			<com:Belisoful\Forum\Web\UI\BEForumRecentPosts Limit="8" />
+			<com:Belisoful\Forum\Web\UI\BEForumTagCloud Limit="30" />
+		</aside>
+	</div>
+</com:TContent>

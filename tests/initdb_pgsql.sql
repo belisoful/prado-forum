@@ -1,4 +1,3 @@
-DROP ROLE IF EXISTS prado_compex_unitest;
-CREATE ROLE prado_compex_unitest superuser;
-ALTER ROLE prado_compex_unitest WITH LOGIN;
-
+DROP ROLE IF EXISTS beforum_unitest;
+CREATE ROLE beforum_unitest SUPERUSER;
+ALTER ROLE beforum_unitest WITH LOGIN PASSWORD 'beforum_unitest';

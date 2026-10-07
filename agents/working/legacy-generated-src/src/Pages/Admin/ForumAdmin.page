@@ -1,0 +1,475 @@
+<%@ Page Language="PHP" Title="Forum Admin" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%=$this->Title%></title>
+  <style>
+    .fadmin{font-family:sans-serif;margin:0;background:#f5f5f5;color:#222}
+    .fadmin-wrap{display:flex;min-height:100vh}
+    .fadmin-nav{width:200px;background:#1a1a2e;color:#ccc;padding:1rem 0;flex-shrink:0}
+    .fadmin-nav__brand{padding:.75rem 1.25rem;font-size:1.1rem;font-weight:700;color:#fff;border-bottom:1px solid #333;margin-bottom:.5rem}
+    .fadmin-nav a{display:block;padding:.6rem 1.25rem;color:#aaa;text-decoration:none;font-size:.9rem}
+    .fadmin-nav a:hover,.fadmin-nav a.active{background:#16213e;color:#fff}
+    .fadmin-content{flex:1;padding:1.5rem;overflow-y:auto}
+    .fadmin-header{margin-bottom:1.5rem}
+    .fadmin-header h1{margin:0;font-size:1.5rem}
+    .fadmin-stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
+    .fadmin-stat{background:#fff;border-radius:6px;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.08);text-align:center}
+    .fadmin-stat__num{font-size:2rem;font-weight:700;color:#1a1a2e}
+    .fadmin-stat__label{font-size:.8rem;color:#666;margin-top:.25rem}
+    .fadmin-stat--warn .fadmin-stat__num{color:#c0392b}
+    .fadmin-card{background:#fff;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:1.5rem}
+    .fadmin-card__head{padding:.75rem 1rem;border-bottom:1px solid #eee;font-weight:600;display:flex;align-items:center;justify-content:space-between}
+    .fadmin-card__body{padding:1rem}
+    table.fadmin-table{width:100%;border-collapse:collapse;font-size:.9rem}
+    table.fadmin-table th{text-align:left;padding:.5rem .75rem;background:#f0f0f0;font-weight:600}
+    table.fadmin-table td{padding:.5rem .75rem;border-top:1px solid #eee;vertical-align:middle}
+    .fadmin-badge{display:inline-block;padding:.15rem .5rem;border-radius:3px;font-size:.75rem;font-weight:600}
+    .fadmin-badge--info{background:#d6eaf8;color:#1a5276}
+    .fadmin-badge--warn{background:#fdebd0;color:#784212}
+    .fadmin-badge--danger{background:#fadbd8;color:#7b241c}
+    .fadmin-badge--success{background:#d5f5e3;color:#1e8449}
+    form.fadmin-form label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.25rem;margin-top:.75rem}
+    form.fadmin-form input[type=text],form.fadmin-form textarea,form.fadmin-form select{width:100%;box-sizing:border-box;padding:.45rem .6rem;border:1px solid #ccc;border-radius:4px;font-size:.9rem}
+    form.fadmin-form textarea{min-height:80px;resize:vertical}
+    .fadmin-btn{display:inline-block;padding:.4rem .9rem;border-radius:4px;font-size:.875rem;font-weight:600;cursor:pointer;text-decoration:none;border:none}
+    .fadmin-btn--primary{background:#1a1a2e;color:#fff}
+    .fadmin-btn--danger{background:#c0392b;color:#fff}
+    .fadmin-btn--sm{padding:.25rem .6rem;font-size:.8rem}
+    .fadmin-actions{display:flex;gap:.4rem;align-items:center}
+  </style>
+</head>
+<body class="fadmin">
+<div class="fadmin-wrap">
+
+  <!-- Sidebar nav -->
+  <nav class="fadmin-nav">
+    <div class="fadmin-nav__brand">Forum Admin</div>
+    <a href="<%=$this->getPanelUrl('dashboard')%>"   class="<%=$this->getPanel()==='dashboard'?   'active':''%>">📊 Dashboard</a>
+    <a href="<%=$this->getPanelUrl('categories')%>"  class="<%=$this->getPanel()==='categories'?  'active':''%>">📂 Categories</a>
+    <a href="<%=$this->getPanelUrl('boards')%>"      class="<%=$this->getPanel()==='boards'?      'active':''%>">📋 Boards</a>
+    <a href="<%=$this->getPanelUrl('users')%>"       class="<%=$this->getPanel()==='users'?       'active':''%>">👤 Users</a>
+    <a href="<%=$this->getPanelUrl('moderation')%>"  class="<%=$this->getPanel()==='moderation'?  'active':''%>">🛡 Moderation</a>
+    <a href="<%=$this->getPanelUrl('settings')%>"    class="<%=$this->getPanel()==='settings'?    'active':''%>">⚙️ Settings</a>
+    <a href="<%=$this->getForumManager()->createUrl('forum/ForumHome')%>" style="margin-top:2rem;border-top:1px solid #333;padding-top:.75rem">← Back to Forum</a>
+  </nav>
+
+  <!-- Main content -->
+  <div class="fadmin-content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <% if ($this->getPanel() === 'dashboard'): %>
+    <div class="fadmin-header"><h1>📊 Dashboard</h1></div>
+
+    <% $d = $this->getDashboard(); %>
+    <div class="fadmin-stat-grid">
+      <div class="fadmin-stat">
+        <div class="fadmin-stat__num"><%=(int)($d['total_threads']??0)%></div>
+        <div class="fadmin-stat__label">Total Threads</div>
+      </div>
+      <div class="fadmin-stat">
+        <div class="fadmin-stat__num"><%=(int)($d['total_posts']??0)%></div>
+        <div class="fadmin-stat__label">Total Posts</div>
+      </div>
+      <div class="fadmin-stat">
+        <div class="fadmin-stat__num"><%=(int)($d['total_users']??0)%></div>
+        <div class="fadmin-stat__label">Active Members</div>
+      </div>
+      <div class="fadmin-stat<%=(($d['pending_posts']??0)>0?' fadmin-stat--warn':'')%>">
+        <div class="fadmin-stat__num"><%=(int)($d['pending_posts']??0)%></div>
+        <div class="fadmin-stat__label">Pending Approval</div>
+      </div>
+      <div class="fadmin-stat<%=(($d['spam_flagged']??0)>0?' fadmin-stat--warn':'')%>">
+        <div class="fadmin-stat__num"><%=(int)($d['spam_flagged']??0)%></div>
+        <div class="fadmin-stat__label">Spam Flagged</div>
+      </div>
+      <div class="fadmin-stat<%=(($d['banned_users']??0)>0?' fadmin-stat--warn':'')%>">
+        <div class="fadmin-stat__num"><%=(int)($d['banned_users']??0)%></div>
+        <div class="fadmin-stat__label">Banned Users</div>
+      </div>
+    </div>
+
+    <div class="fadmin-card">
+      <div class="fadmin-card__head">
+        Recent Moderation Log
+        <a href="<%=$this->getPanelUrl('moderation')%>" class="fadmin-btn fadmin-btn--sm fadmin-btn--primary">View All</a>
+      </div>
+      <div class="fadmin-card__body">
+        <% $log = $d['recent_mod_log'] ?? []; %>
+        <% if (empty($log)): %>
+        <p style="color:#888;margin:0">No recent moderation actions.</p>
+        <% else: %>
+        <table class="fadmin-table">
+          <thead><tr><th>When</th><th>Moderator</th><th>Action</th><th>Target</th><th>Reason</th></tr></thead>
+          <tbody>
+          <% foreach ($log as $entry): %>
+          <tr>
+            <td style="white-space:nowrap;color:#888"><%=htmlspecialchars(date('M j H:i', strtotime($entry->created_at)))%></td>
+            <td><%=htmlspecialchars($entry->moderator ? $entry->moderator->username : '—')%></td>
+            <td><span class="fadmin-badge fadmin-badge--info"><%=htmlspecialchars($entry->action_type)%></span></td>
+            <td><%=htmlspecialchars($entry->target_type)%> #<%=(int)$entry->target_id%></td>
+            <td style="color:#555;font-size:.85rem"><%=htmlspecialchars(mb_strimwidth($entry->reason??'', 0, 80, '…'))%></td>
+          </tr>
+          <% endforeach; %>
+          </tbody>
+        </table>
+        <% endif; %>
+      </div>
+    </div>
+
+    <!-- ===== CATEGORIES ===== -->
+    <% elseif ($this->getPanel() === 'categories'): %>
+    <div class="fadmin-header"><h1>📂 Categories</h1></div>
+
+    <!-- Add/Edit form -->
+    <div class="fadmin-card">
+      <div class="fadmin-card__head">Add / Edit Category</div>
+      <div class="fadmin-card__body">
+        <form method="post" action="<%=$this->getPanelUrl('categories')%>" class="fadmin-form">
+          <input type="hidden" name="cat_id" id="cat_id_field" value="0">
+          <label for="cat_name_field">Name <span style="color:#c00">*</span></label>
+          <input type="text" name="cat_name" id="cat_name_field" maxlength="120" required>
+          <label for="cat_desc_field">Description</label>
+          <textarea name="cat_desc" id="cat_desc_field" rows="2"></textarea>
+          <label for="cat_order_field">Sort Order</label>
+          <input type="text" name="cat_order" id="cat_order_field" value="0" style="width:80px">
+          <label style="display:flex;align-items:center;gap:.5rem;margin-top:.75rem">
+            <input type="checkbox" name="cat_active" value="1" checked id="cat_active_field"> Active
+          </label>
+          <div style="margin-top:1rem">
+            <com:TButton Text="Save Category" OnClick="saveCategory" CssClass="fadmin-btn fadmin-btn--primary" />
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Category list -->
+    <div class="fadmin-card">
+      <div class="fadmin-card__head">All Categories</div>
+      <div class="fadmin-card__body">
+        <% if (empty($this->getCategories())): %>
+        <p style="color:#888;margin:0">No categories yet. Create one above.</p>
+        <% else: %>
+        <table class="fadmin-table">
+          <thead><tr><th>#</th><th>Name</th><th>Boards</th><th>Order</th><th>Active</th><th>Actions</th></tr></thead>
+          <tbody>
+          <% foreach ($this->getCategories() as $cat): %>
+          <tr>
+            <td style="color:#999"><%=(int)$cat->id%></td>
+            <td>
+              <strong><%=htmlspecialchars($cat->name)%></strong>
+              <% if ($cat->description): %>
+              <div style="color:#888;font-size:.8rem"><%=htmlspecialchars(mb_strimwidth($cat->description,0,60,'…'))%></div>
+              <% endif; %>
+            </td>
+            <td><%=count($cat->boards??[])%></td>
+            <td><%=(int)$cat->sort_order%></td>
+            <td><%=$cat->is_active ? '<span class="fadmin-badge fadmin-badge--success">Yes</span>' : '<span class="fadmin-badge fadmin-badge--danger">No</span>'%></td>
+            <td>
+              <div class="fadmin-actions">
+                <button type="button" class="fadmin-btn fadmin-btn--sm fadmin-btn--primary"
+                  onclick="fillCatForm(<%=(int)$cat->id%>,'<%=addslashes(htmlspecialchars($cat->name))%>','<%=addslashes(htmlspecialchars($cat->description??''))%>',<%=(int)$cat->sort_order%>,<%=(int)$cat->is_active%>)">
+                  Edit
+                </button>
+                <form method="post" action="<%=$this->getPanelUrl('categories')%>" style="display:inline"
+                      onsubmit="return confirm('Delete this category and all its boards?')">
+                  <input type="hidden" name="cat_id" value="<%=(int)$cat->id%>">
+                  <com:TButton Text="Delete" OnClick="deleteCategory" CssClass="fadmin-btn fadmin-btn--sm fadmin-btn--danger" />
+                </form>
+              </div>
+            </td>
+          </tr>
+          <% endforeach; %>
+          </tbody>
+        </table>
+        <% endif; %>
+      </div>
+    </div>
+    <script>
+    function fillCatForm(id,name,desc,order,active){
+      document.getElementById('cat_id_field').value=id;
+      document.getElementById('cat_name_field').value=name;
+      document.getElementById('cat_desc_field').value=desc;
+      document.getElementById('cat_order_field').value=order;
+      document.getElementById('cat_active_field').checked=active==1;
+      document.getElementById('cat_name_field').focus();
+      document.getElementById('cat_name_field').scrollIntoView({behavior:'smooth',block:'center'});
+    }
+    </script>
+
+    <!-- ===== BOARDS ===== -->
+    <% elseif ($this->getPanel() === 'boards'): %>
+    <div class="fadmin-header"><h1>📋 Boards</h1></div>
+
+    <!-- Board add form -->
+    <div class="fadmin-card">
+      <div class="fadmin-card__head">Add / Edit Board</div>
+      <div class="fadmin-card__body">
+        <form method="post" action="<%=$this->getPanelUrl('boards')%>" class="fadmin-form">
+          <input type="hidden" name="board_id" id="board_id_field" value="0">
+          <label>Category <span style="color:#c00">*</span></label>
+          <select name="board_cat_id" id="board_cat_field">
+            <% foreach ($this->getCategories() as $cat): %>
+            <option value="<%=(int)$cat->id%>"><%=htmlspecialchars($cat->name)%></option>
+            <% endforeach; %>
+          </select>
+          <label>Board Name <span style="color:#c00">*</span></label>
+          <input type="text" name="board_name" id="board_name_field" maxlength="120" required>
+          <label>Description</label>
+          <textarea name="board_desc" id="board_desc_field" rows="2"></textarea>
+          <label>Slug</label>
+          <input type="text" name="board_slug" id="board_slug_field" maxlength="100" placeholder="auto-generated if blank">
+          <label>Sort Order</label>
+          <input type="text" name="board_order" id="board_order_field" value="0" style="width:80px">
+          <label style="display:flex;align-items:center;gap:.5rem;margin-top:.75rem">
+            <input type="checkbox" name="board_active" value="1" checked id="board_active_field"> Active
+          </label>
+          <label style="display:flex;align-items:center;gap:.5rem">
+            <input type="checkbox" name="board_locked" value="1" id="board_locked_field"> Locked (no new posts)
+          </label>
+          <div style="margin-top:1rem">
+            <com:TButton Text="Save Board" OnClick="saveBoard" CssClass="fadmin-btn fadmin-btn--primary" />
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Board list -->
+    <div class="fadmin-card">
+      <div class="fadmin-card__head">All Boards</div>
+      <div class="fadmin-card__body">
+        <% if (empty($this->getBoards())): %>
+        <p style="color:#888;margin:0">No boards yet. Create one above.</p>
+        <% else: %>
+        <table class="fadmin-table">
+          <thead><tr><th>#</th><th>Board</th><th>Category</th><th>Threads</th><th>Posts</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+          <% foreach ($this->getBoards() as $board): %>
+          <tr>
+            <td style="color:#999"><%=(int)$board->id%></td>
+            <td>
+              <strong><%=htmlspecialchars($board->name)%></strong>
+              <% if ($board->description): %>
+              <div style="color:#888;font-size:.8rem"><%=htmlspecialchars(mb_strimwidth($board->description,0,60,'…'))%></div>
+              <% endif; %>
+            </td>
+            <td><%=htmlspecialchars($board->category ? $board->category->name : '—')%></td>
+            <td><%=(int)$board->thread_count%></td>
+            <td><%=(int)$board->post_count%></td>
+            <td>
+              <% if ($board->is_locked): %><span class="fadmin-badge fadmin-badge--warn">Locked</span><% endif; %>
+              <% if (!$board->is_active): %><span class="fadmin-badge fadmin-badge--danger">Hidden</span><% endif; %>
+              <% if ($board->is_active && !$board->is_locked): %><span class="fadmin-badge fadmin-badge--success">Active</span><% endif; %>
+            </td>
+            <td>
+              <div class="fadmin-actions">
+                <a href="<%=$this->getForumManager()->createUrl('forum/ForumView', ['id' => $board->id])%>"
+                   class="fadmin-btn fadmin-btn--sm fadmin-btn--primary" target="_blank">View</a>
+                <form method="post" action="<%=$this->getPanelUrl('boards')%>" style="display:inline"
+                      onsubmit="return confirm('Delete this board?')">
+                  <input type="hidden" name="board_id" value="<%=(int)$board->id%>">
+                  <com:TButton Text="Delete" OnClick="deleteBoard" CssClass="fadmin-btn fadmin-btn--sm fadmin-btn--danger" />
+                </form>
+              </div>
+            </td>
+          </tr>
+          <% endforeach; %>
+          </tbody>
+        </table>
+        <% endif; %>
+      </div>
+    </div>
+
+    <!-- ===== USERS ===== -->
+    <% elseif ($this->getPanel() === 'users'): %>
+    <div class="fadmin-header"><h1>👤 Users</h1></div>
+
+    <!-- Search bar -->
+    <div class="fadmin-card">
+      <div class="fadmin-card__body">
+        <form method="get" action="<%=$this->getPanelUrl('users')%>" style="display:flex;gap:.5rem;align-items:flex-end">
+          <div style="flex:1">
+            <label style="display:block;font-size:.85rem;font-weight:600;margin-bottom:.25rem">Search Username / Email</label>
+            <input type="text" name="uq" value="<%=htmlspecialchars($this->getRequest()->getParam('uq',''))%>"
+                   style="width:100%;padding:.45rem .6rem;border:1px solid #ccc;border-radius:4px;font-size:.9rem">
+          </div>
+          <button type="submit" class="fadmin-btn fadmin-btn--primary">Search</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- User results -->
+    <div class="fadmin-card">
+      <div class="fadmin-card__head">User Profiles</div>
+      <div class="fadmin-card__body">
+        <% $userList = $this->getUserList(); %>
+        <% if (empty($userList)): %>
+        <p style="color:#888;margin:0"><%=$this->getRequest()->getParam('uq','')!=='' ? 'No users matched your search.' : 'Enter a search term above.'%></p>
+        <% else: %>
+        <table class="fadmin-table">
+          <thead><tr><th>#</th><th>Username</th><th>Posts</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+          <% foreach ($userList as $u): %>
+          <tr>
+            <td style="color:#999"><%=(int)$u->id%></td>
+            <td>
+              <strong><%=htmlspecialchars($u->username)%></strong>
+              <% if ($u->display_name && $u->display_name !== $u->username): %>
+              <div style="color:#888;font-size:.8rem"><%=htmlspecialchars($u->display_name)%></div>
+              <% endif; %>
+            </td>
+            <td><%=(int)$u->post_count%></td>
+            <td style="color:#888;white-space:nowrap"><%=htmlspecialchars(date('M j, Y', strtotime($u->created_at)))%></td>
+            <td>
+              <% if ($u->is_banned): %><span class="fadmin-badge fadmin-badge--danger">Banned</span><% endif; %>
+              <% if (!$u->is_active): %><span class="fadmin-badge fadmin-badge--warn">Inactive</span><% endif; %>
+              <% if ($u->is_active && !$u->is_banned): %><span class="fadmin-badge fadmin-badge--success">Active</span><% endif; %>
+            </td>
+            <td>
+              <div class="fadmin-actions">
+                <a href="<%=$this->getForumManager()->createUrl('forum/UserProfile', ['username' => $u->username])%>"
+                   class="fadmin-btn fadmin-btn--sm fadmin-btn--primary" target="_blank">View</a>
+                <% if (!$u->is_banned): %>
+                <form method="post" action="<%=$this->getPanelUrl('users')%>" style="display:inline"
+                      onsubmit="return confirm('Ban this user?')">
+                  <input type="hidden" name="user_id" value="<%=(int)$u->id%>">
+                  <input type="hidden" name="user_action" value="ban">
+                  <com:TButton Text="Ban" OnClick="moderateUser" CssClass="fadmin-btn fadmin-btn--sm fadmin-btn--danger" />
+                </form>
+                <% else: %>
+                <form method="post" action="<%=$this->getPanelUrl('users')%>" style="display:inline">
+                  <input type="hidden" name="user_id" value="<%=(int)$u->id%>">
+                  <input type="hidden" name="user_action" value="unban">
+                  <com:TButton Text="Unban" OnClick="moderateUser" CssClass="fadmin-btn fadmin-btn--sm fadmin-btn--primary" />
+                </form>
+                <% endif; %>
+              </div>
+            </td>
+          </tr>
+          <% endforeach; %>
+          </tbody>
+        </table>
+        <% endif; %>
+      </div>
+    </div>
+
+    <!-- ===== MODERATION ===== -->
+    <% elseif ($this->getPanel() === 'moderation'): %>
+    <div class="fadmin-header"><h1>🛡 Moderation Queue</h1></div>
+
+    <% $pending = $this->getPendingPosts(); $spam = $this->getSpamPosts(); %>
+
+    <div class="fadmin-card">
+      <div class="fadmin-card__head">Pending Approval (<%=count($pending)%>)</div>
+      <div class="fadmin-card__body">
+        <% if (empty($pending)): %>
+        <p style="color:#888;margin:0">No posts pending approval. 🎉</p>
+        <% else: %>
+        <table class="fadmin-table">
+          <thead><tr><th>#</th><th>Author</th><th>Thread</th><th>Preview</th><th>Posted</th><th>Actions</th></tr></thead>
+          <tbody>
+          <% foreach ($pending as $post): %>
+          <tr>
+            <td style="color:#999"><%=(int)$post->id%></td>
+            <td><%=htmlspecialchars($post->author ? $post->author->username : '—')%></td>
+            <td>#<%=(int)$post->thread_id%></td>
+            <td style="font-size:.85rem;color:#555"><%=htmlspecialchars(mb_strimwidth(strip_tags($post->content_html??$post->content_raw??''),0,100,'…'))%></td>
+            <td style="white-space:nowrap;color:#888"><%=htmlspecialchars(date('M j H:i', strtotime($post->created_at)))%></td>
+            <td>
+              <div class="fadmin-actions">
+                <form method="post" action="<%=$this->getPanelUrl('moderation')%>" style="display:inline">
+                  <input type="hidden" name="post_id" value="<%=(int)$post->id%>">
+                  <input type="hidden" name="mod_action" value="approve">
+                  <com:TButton Text="Approve" OnClick="moderatePost" CssClass="fadmin-btn fadmin-btn--sm fadmin-btn--primary" />
+                </form>
+                <form method="post" action="<%=$this->getPanelUrl('moderation')%>" style="display:inline"
+                      onsubmit="return confirm('Delete this post?')">
+                  <input type="hidden" name="post_id" value="<%=(int)$post->id%>">
+                  <input type="hidden" name="mod_action" value="delete">
+                  <com:TButton Text="Delete" OnClick="moderatePost" CssClass="fadmin-btn fadmin-btn--sm fadmin-btn--danger" />
+                </form>
+              </div>
+            </td>
+          </tr>
+          <% endforeach; %>
+          </tbody>
+        </table>
+        <% endif; %>
+      </div>
+    </div>
+
+    <div class="fadmin-card">
+      <div class="fadmin-card__head">Spam Flagged (<%=count($spam)%>)</div>
+      <div class="fadmin-card__body">
+        <% if (empty($spam)): %>
+        <p style="color:#888;margin:0">No spam-flagged posts. 🎉</p>
+        <% else: %>
+        <table class="fadmin-table">
+          <thead><tr><th>#</th><th>Author</th><th>Score</th><th>Preview</th><th>Actions</th></tr></thead>
+          <tbody>
+          <% foreach ($spam as $post): %>
+          <tr>
+            <td style="color:#999"><%=(int)$post->id%></td>
+            <td><%=htmlspecialchars($post->author ? $post->author->username : '—')%></td>
+            <td><span class="fadmin-badge fadmin-badge--danger"><%=(int)$post->spam_score%></span></td>
+            <td style="font-size:.85rem;color:#555"><%=htmlspecialchars(mb_strimwidth(strip_tags($post->content_html??$post->content_raw??''),0,100,'…'))%></td>
+            <td>
+              <div class="fadmin-actions">
+                <form method="post" action="<%=$this->getPanelUrl('moderation')%>" style="display:inline">
+                  <input type="hidden" name="post_id" value="<%=(int)$post->id%>">
+                  <input type="hidden" name="mod_action" value="clear_spam">
+                  <com:TButton Text="Not Spam" OnClick="moderatePost" CssClass="fadmin-btn fadmin-btn--sm fadmin-btn--primary" />
+                </form>
+                <form method="post" action="<%=$this->getPanelUrl('moderation')%>" style="display:inline"
+                      onsubmit="return confirm('Delete this spam post?')">
+                  <input type="hidden" name="post_id" value="<%=(int)$post->id%>">
+                  <input type="hidden" name="mod_action" value="delete">
+                  <com:TButton Text="Delete" OnClick="moderatePost" CssClass="fadmin-btn fadmin-btn--sm fadmin-btn--danger" />
+                </form>
+              </div>
+            </td>
+          </tr>
+          <% endforeach; %>
+          </tbody>
+        </table>
+        <% endif; %>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS ===== -->
+    <% elseif ($this->getPanel() === 'settings'): %>
+    <div class="fadmin-header"><h1>⚙️ Forum Settings Overview</h1></div>
+    <p style="color:#666;margin-bottom:1.5rem">Settings are configured in the application config XML. This panel shows the current runtime values read from <code>TForumManager</code>.</p>
+
+    <% $fm = $this->getForumManager(); %>
+    <div class="fadmin-card">
+      <div class="fadmin-card__head">General</div>
+      <div class="fadmin-card__body">
+        <table class="fadmin-table">
+          <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Site Name</td><td><code><%=htmlspecialchars($fm->getSiteName())%></code></td></tr>
+            <tr><td>Threads Per Page</td><td><code><%=(int)$fm->getThreadsPerPage()%></code></td></tr>
+            <tr><td>Posts Per Page</td><td><code><%=(int)$fm->getPostsPerPage()%></code></td></tr>
+            <tr><td>Max Attachment Size (bytes)</td><td><code><%=(int)$fm->getMaxAttachmentSize()%></code></td></tr>
+            <tr><td>Spam Score Threshold</td><td><code><%=(int)$fm->getSpamScoreThreshold()%></code></td></tr>
+            <tr><td>Rate Limit (posts/hour)</td><td><code><%=(int)$fm->getRateLimitPostsPerHour()%></code></td></tr>
+            <tr><td>Moderation Required</td><td><code><%=$fm->getModerationRequired()?'true':'false'%></code></td></tr>
+            <tr><td>Reputation Enabled</td><td><code><%=$fm->getReputationEnabled()?'true':'false'%></code></td></tr>
+            <tr><td>Badges Enabled</td><td><code><%=$fm->getBadgesEnabled()?'true':'false'%></code></td></tr>
+            <tr><td>Enable Signatures</td><td><code><%=$fm->getEnableSignatures()?'true':'false'%></code></td></tr>
+            <tr><td>Allowed Attachment Types</td><td><code><%=htmlspecialchars(implode(', ', $fm->getAllowedAttachmentTypes()))%></code></td></tr>
+            <tr><td>RSS Feed Enabled</td><td><code><%=$fm->getRSSEnabled()?'true':'false'%></code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <% endif; %>
+
+  </div><!-- .fadmin-content -->
+</div><!-- .fadmin-wrap -->
+</body>
+</html>

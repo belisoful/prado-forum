@@ -1,0 +1,5 @@
+<com:TContent ID=<%$ PluginContentId %>>
+	<com:Belisoful\Forum\Web\UI\BEForumToolbar />
+	<com:Belisoful\Forum\Web\UI\BEForumBreadcrumbs />
+	<com:Belisoful\Forum\Web\UI\BEForumMemberProfile />
+</com:TContent>

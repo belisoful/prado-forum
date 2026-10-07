@@ -1,0 +1,3 @@
+<com:TContent ID=<%$ PluginContentId %>>
+	<com:Belisoful\Forum\Web\UI\BEForumAttachmentDownload />
+</com:TContent>

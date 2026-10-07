@@ -1,9 +1,9 @@
 {
-	"name": "pradosoft/prado-composer-extension",
+	"name": "belisoful/prado-forum",
 	"type": "prado4-extension",
-	"description": "The Base example PRADO Composer Extension",
-	"keywords": [ "prado", "framework", "example", "extension"],
-	"homepage": "https://github.com/pradosoft/prado-composer-extension",
+	"description": "A full-featured, template-control driven forum extension for PRADO 4.3: categories, boards, threads, posts, Markdown, reactions, polls, tags, attachments, subscriptions, notifications, search, moderation, feeds, permissions and cron maintenance.",
+	"keywords": ["prado", "framework", "extension", "forum", "bulletin-board", "discussion", "markdown", "active-record"],
+	"homepage": "https://github.com/belisoful/prado-forum",
 	"license": "BSD-3-Clause",
 	"authors": [
 		{
@@ -15,7 +15,7 @@
 	],
 	"autoload": {
 		"psr-4": {
-			"PradoComposerExtension\\": "src"
+			"Belisoful\\Forum\\": "src"
 		}
 	},
 	"repositories": [
@@ -25,11 +25,21 @@
 		}
 	],
 	"require": {
-		"php": ">=7.4.0",
-		"pradosoft/prado" : "^4.2.0-alpha1"
+		"php": ">=8.1.0",
+		"ext-json": "*",
+		"ext-mbstring": "*",
+		"ext-pdo": "*",
+		"pradosoft/prado": "^4.3",
+		"erusev/parsedown": "^1.8",
+		"ezyang/htmlpurifier": "^4.17"
 	},
-	"require-dev" : {
-		"phpunit/phpunit" : "^10",
+	"suggest": {
+		"ext-pdo_sqlite": "Zero configuration default database and the unit tests",
+		"ext-pdo_mysql": "MySQL / MariaDB storage",
+		"ext-pdo_pgsql": "PostgreSQL storage"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^10",
 		"phpdocumentor/shim": "^3",
 		"friendsofphp/php-cs-fixer": "^3.94",
 		"phpstan/phpstan": "^2.1"
@@ -43,9 +53,15 @@
 		}
 	},
 	"scripts": {
-		"unittest": "vendor/bin/phpunit --testsuite unit"
+		"unittest": "vendor/bin/phpunit --testsuite unit",
+		"fulltest": [
+			"vendor/bin/php-cs-fixer fix --dry-run",
+			"vendor/bin/phpstan analyse --memory-limit=512M",
+			"vendor/bin/phpunit --testsuite unit"
+		],
+		"gendoc": "vendor/bin/phpdoc"
 	},
 	"extra": {
-		"bootstrap": "PradoComposerExtension\\MainModule"
+		"bootstrap": "Belisoful\\Forum\\BEForumModule"
 	}
 }

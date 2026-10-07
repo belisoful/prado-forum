@@ -1,0 +1,328 @@
+; =============================================================================
+; PRADO Forum Extension — Error Messages
+; Namespace: Belisoful\Forum
+;
+; Format (same as PRADO core errorMessages.txt):
+;   error_key=Message text with optional {0}, {1} … placeholders.
+;
+; Keys are lowercase, underscore-separated, prefixed by the subsystem.
+; Placeholders are positional; {0} is the first extra argument passed to the
+; exception constructor after the key.
+; =============================================================================
+
+
+; -----------------------------------------------------------------------------
+; TForumManager
+; -----------------------------------------------------------------------------
+
+forum_no_connection_id={0} requires a ConnectionID to locate the database connection. Set the ConnectionID property in your application configuration.
+
+forum_invalid_connection_id=TForumManager ConnectionID '{0}' does not refer to a TDataSourceConfig or TDbConnection module. Check your application configuration.
+
+forum_invalid_moderation_mode='{0}' is not a valid moderation mode. Allowed values are 'pre' (approve before publish) and 'post' (publish then review).
+
+forum_upload_dir_create_failed=Cannot create upload directory '{0}'. Check that the web server process has write access to the parent directory.
+
+forum_upload_dir_not_writable=Upload directory '{0}' exists but is not writable by the web server. Check the directory permissions.
+
+forum_invalid_posts_per_page=PostsPerPage must be a positive integer; '{0}' was given.
+
+forum_invalid_threads_per_page=ThreadsPerPage must be a positive integer; '{0}' was given.
+
+forum_invalid_spam_threshold=SpamScoreThreshold must be a non-negative integer; '{0}' was given.
+
+forum_invalid_rate_limit=RateLimitPostsPerHour must be a positive integer; '{0}' was given.
+
+forum_invalid_max_attachment_size=MaxAttachmentSize must be a positive integer (bytes); '{0}' was given.
+
+forum_attachment_type_not_allowed=Attachment type '{0}' is not in the allowed list. Permitted types are: {1}.
+
+forum_attachment_too_large=Attachment '{0}' exceeds the maximum allowed size of {1} bytes.
+
+forum_rss_disabled=RSS feeds are disabled. Enable them by setting RSSEnabled to true in the TForumManager configuration.
+
+forum_polls_disabled=Polls are disabled. Enable them by setting EnablePolls to true in the TForumManager configuration.
+
+forum_reactions_disabled=Reactions are disabled. Enable them by setting ReactionsEnabled to true in the TForumManager configuration.
+
+forum_reputation_disabled=Reputation is disabled. Enable it by setting ReputationEnabled to true in the TForumManager configuration.
+
+forum_badges_disabled=Badges are disabled. Enable them by setting BadgesEnabled to true in the TForumManager configuration.
+
+forum_invalid_reputation_action='{0}' is not a valid reputation action type. Must be one of: post_like, thread_start, post_marked_helpful, post_reported_spam.
+
+
+; -----------------------------------------------------------------------------
+; TForumPlugin
+; -----------------------------------------------------------------------------
+
+forum_plugin_manager_not_found=TForumPlugin cannot find a TForumManager module with ID '{0}'. Ensure the TForumManager module is declared before TForumPlugin in your application configuration.
+
+forum_plugin_not_initialised=TForumPlugin has not been initialised. The getForumManager() accessor must not be called before the module's init() method has run.
+
+forum_plugin_page_dir_not_found=TForumPlugin page directory '{0}' does not exist. Verify the extension is installed correctly and the path mapping is correct.
+
+forum_plugin_duplicate_base_path=TForumPlugin cannot register page directory '{0}' because it has already been added to the page service. Duplicate registrations are not allowed.
+
+
+; -----------------------------------------------------------------------------
+; TForumControl (base class for all forum template controls / portlets)
+; -----------------------------------------------------------------------------
+
+forum_control_manager_not_found={0}: no TForumManager module found with ID '{1}'. Set the ModuleID property to the correct module ID in your template.
+
+
+; -----------------------------------------------------------------------------
+; TForumBreadcrumbs
+; -----------------------------------------------------------------------------
+
+forum_breadcrumbs_invalid_crumb=addCrumb() requires a non-empty label. The crumb at position {0} has an empty label.
+
+
+; -----------------------------------------------------------------------------
+; TForumCategories
+; -----------------------------------------------------------------------------
+
+forum_categories_board_not_found=TForumCategories cannot build a board URL: board ID {0} was not found.
+
+
+; -----------------------------------------------------------------------------
+; TForumThreadList
+; -----------------------------------------------------------------------------
+
+forum_threadlist_invalid_board=TForumThreadList cannot load threads: board ID {0} does not exist or has been deleted.
+
+forum_threadlist_invalid_page=Page number must be a positive integer; '{0}' was given.
+
+
+; -----------------------------------------------------------------------------
+; TForumPostList
+; -----------------------------------------------------------------------------
+
+forum_postlist_invalid_thread=TForumPostList cannot load posts: thread ID {0} does not exist or has been deleted.
+
+forum_postlist_invalid_page=Page number must be a positive integer; '{0}' was given.
+
+
+; -----------------------------------------------------------------------------
+; TForumNewThread
+; -----------------------------------------------------------------------------
+
+forum_newthread_board_not_found=Cannot create a thread: board ID {0} was not found.
+
+forum_newthread_board_locked=Board '{0}' is locked; new threads cannot be created.
+
+forum_newthread_board_inactive=Board '{0}' is not active; new threads cannot be created.
+
+forum_newthread_title_required=Thread title is required and cannot be empty.
+
+forum_newthread_title_too_long=Thread title must not exceed {0} characters; {1} were given.
+
+forum_newthread_body_required=Thread body (first post) is required and cannot be empty.
+
+forum_newthread_user_banned=Your account has been banned and you cannot create new threads.
+
+forum_newthread_spam_detected=Your post was flagged as possible spam (score: {0}). Please revise your content and try again.
+
+forum_newthread_rate_limited=You are posting too frequently. Please wait before creating another thread.
+
+forum_newthread_poll_no_question=A poll question is required when adding a poll to a thread.
+
+forum_newthread_poll_too_few_options=A poll requires at least 2 options; {0} were provided.
+
+forum_newthread_poll_option_empty=Poll option at position {0} must not be empty.
+
+
+; -----------------------------------------------------------------------------
+; TForumReply
+; -----------------------------------------------------------------------------
+
+forum_reply_thread_not_found=Cannot post a reply: thread ID {0} was not found.
+
+forum_reply_thread_locked=Thread '{0}' is locked; no further replies are allowed.
+
+forum_reply_thread_deleted=Thread ID {0} has been deleted; no replies are accepted.
+
+forum_reply_body_required=Reply body is required and cannot be empty.
+
+forum_reply_user_banned=Your account has been banned and you cannot post replies.
+
+forum_reply_spam_detected=Your reply was flagged as possible spam (score: {0}). Please revise your content and try again.
+
+forum_reply_rate_limited=You are posting too frequently. Please wait before posting another reply.
+
+
+; -----------------------------------------------------------------------------
+; TForumPoll
+; -----------------------------------------------------------------------------
+
+forum_poll_not_found=Poll for thread ID {0} was not found.
+
+forum_poll_closed=The poll for thread ID {0} is closed; voting is no longer accepted.
+
+forum_poll_already_voted=You have already voted in this poll.
+
+forum_poll_invalid_option=Option ID {0} does not belong to poll ID {1}.
+
+forum_poll_too_many_choices=This poll allows at most {0} choice(s); {1} were selected.
+
+forum_poll_no_options_selected=You must select at least one option to submit a vote.
+
+
+; -----------------------------------------------------------------------------
+; TForumSearch
+; -----------------------------------------------------------------------------
+
+forum_search_query_too_short=Search query must be at least {0} characters. Please enter a longer search term.
+
+forum_search_invalid_scope='{0}' is not a valid search scope. Allowed values are 'threads' and 'posts'.
+
+
+; -----------------------------------------------------------------------------
+; TForumStats
+; -----------------------------------------------------------------------------
+
+forum_stats_cache_error=TForumStats could not store statistics in the cache. Verify that a cache module is configured in the application.
+
+
+; -----------------------------------------------------------------------------
+; TForumTagCloud
+; -----------------------------------------------------------------------------
+
+forum_tagcloud_no_tags=TForumTagCloud found no tags to display. Create some threads with tags first.
+
+forum_tagcloud_invalid_min_size=MinSize must be a positive number (em units); '{0}' was given.
+
+forum_tagcloud_invalid_max_size=MaxSize must be a positive number (em units) greater than MinSize; '{0}' was given.
+
+
+; -----------------------------------------------------------------------------
+; TForumRecentPosts
+; -----------------------------------------------------------------------------
+
+forum_recentposts_invalid_limit=Limit must be a positive integer; '{0}' was given.
+
+
+; -----------------------------------------------------------------------------
+; TForumSearchService
+; -----------------------------------------------------------------------------
+
+forum_search_invalid_page=Page number must be a positive integer; '{0}' was given.
+
+forum_search_backend_unavailable=The fulltext search backend is not available on this database. Falling back to LIKE search. To silence this notice, set SearchBackend to 'like' in the TForumManager configuration.
+
+
+; -----------------------------------------------------------------------------
+; TForumBBCodeParser
+; -----------------------------------------------------------------------------
+
+forum_bbcode_url_unsafe=URL '{0}' uses a protocol that is not in the allowed list. Allowed protocols are: {1}.
+
+forum_bbcode_img_url_unsafe=Image URL '{0}' uses a protocol that is not in the allowed list.
+
+forum_bbcode_nesting_too_deep=BBCode nesting depth exceeded the maximum of {0} levels. This may indicate malformed markup or an injection attempt.
+
+
+; -----------------------------------------------------------------------------
+; TForumNotificationService
+; -----------------------------------------------------------------------------
+
+forum_notification_save_failed=Failed to save a forum notification of type '{0}' for user ID {1}.
+
+forum_notification_user_not_found=Cannot deliver notification: forum user profile for username '{0}' was not found.
+
+
+; -----------------------------------------------------------------------------
+; TForumSpamService
+; -----------------------------------------------------------------------------
+
+forum_spam_invalid_content=TForumSpamService received an empty or non-string content value. Spam scoring skipped.
+
+
+; -----------------------------------------------------------------------------
+; TForumRSSService
+; -----------------------------------------------------------------------------
+
+forum_rss_board_not_found=Cannot generate RSS feed: board ID {0} was not found.
+
+forum_rss_thread_not_found=Cannot generate RSS feed: thread ID {0} was not found.
+
+forum_rss_invalid_format='{0}' is not a valid feed format. Allowed values are 'atom' and 'rss2'.
+
+
+; -----------------------------------------------------------------------------
+; TForumUserBehavior (attached behavior on the users module)
+; -----------------------------------------------------------------------------
+
+forum_behavior_owner_not_user=TForumUserBehavior can only be attached to a user-manager module; got {0}.
+
+forum_behavior_profile_create_failed=Failed to create a forum user profile for '{0}'. Check that the forum_user_profiles table exists and the database is writable.
+
+
+; -----------------------------------------------------------------------------
+; Active Record classes
+; -----------------------------------------------------------------------------
+
+forum_ar_board_not_found=Forum board with ID {0} was not found.
+
+forum_ar_thread_not_found=Forum thread with ID {0} was not found.
+
+forum_ar_post_not_found=Forum post with ID {0} was not found.
+
+forum_ar_category_not_found=Forum category with ID {0} was not found.
+
+forum_ar_tag_not_found=Forum tag with slug '{0}' was not found.
+
+forum_ar_user_profile_not_found=Forum user profile for username '{0}' was not found.
+
+forum_ar_poll_not_found=Forum poll for thread ID {0} was not found.
+
+forum_ar_attachment_not_found=Forum attachment with ID {0} was not found.
+
+forum_ar_save_failed=Failed to save {0} (ID: {1}). Check the database connection and schema.
+
+forum_ar_delete_failed=Failed to delete {0} (ID: {1}). Check the database connection and that the record exists.
+
+forum_ar_invalid_slug=Slug '{0}' is not valid. Slugs must contain only lowercase letters, digits, and hyphens.
+
+
+; -----------------------------------------------------------------------------
+; Page classes (ForumHome, ForumView, ThreadView, NewThread, UserProfile, Search, EditPost)
+; -----------------------------------------------------------------------------
+
+forum_page_board_not_found=Forum board with ID {0} was not found or has been deleted. It may have been moved or removed by an administrator.
+
+forum_page_thread_not_found=Forum thread with ID {0} was not found or has been deleted.
+
+forum_page_post_not_found=Forum post with ID {0} was not found or has been deleted.
+
+forum_page_access_denied=You do not have permission to perform this action. Please log in and ensure your account has the required role.
+
+forum_page_edit_not_owner=You can only edit your own posts. If you believe this is an error, contact a moderator.
+
+forum_page_edit_post_locked=This post belongs to a locked thread and cannot be edited.
+
+forum_page_invalid_module=The forum module ID '{0}' was not found in the application configuration.
+
+
+; -----------------------------------------------------------------------------
+; Admin pages (ForumAdmin, ModerationPanel)
+; -----------------------------------------------------------------------------
+
+forum_admin_access_denied=Forum administration requires the 'ForumAdmin' role. Your account does not have this role.
+
+forum_modpanel_access_denied=Forum moderation requires at least the 'ForumModerator' role. Your account does not have this role.
+
+forum_admin_category_not_found=Cannot update category: ID {0} was not found.
+
+forum_admin_board_not_found=Cannot update board: ID {0} was not found.
+
+forum_admin_user_not_found=Cannot moderate user: forum profile with ID {0} was not found.
+
+forum_admin_invalid_panel='{0}' is not a valid admin panel. Valid panels are: dashboard, categories, boards, users, moderation, settings.
+
+forum_admin_category_name_required=Category name is required; it must not be empty.
+
+forum_admin_board_name_required=Board name is required; it must not be empty.
+
+forum_admin_board_category_required=A board must belong to a category. Please select a category.

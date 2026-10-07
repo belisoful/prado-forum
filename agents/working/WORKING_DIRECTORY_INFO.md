@@ -1,0 +1,11 @@
+## "agents/working/" Working Memory Directory Information
+- The Goal of Working Memory is to make Coding Agents more efficient at their project tasks.
+- The Working Memory directory for planning, analysis, and knowledge is "agents/working/"
+- The Working Memory directory may be used as a larger memory space to store and retain knowledge of the PRADO Framework for later use and analysis
+- Scan (by file name) the Working Memory directory (recursively) for useful or relevant files to analyze relating to the task at hand
+- Working Memory file names must reflect the contents for other agents to identify its usefulness
+- Update the Working Memory files as needed for efficient coding and analysis.
+- Clean up any Working Memory (and its directories) that are not needed or which are superseded
+- When Working Memory involves only a specific PRADO class, create any directories needed to mimic the <relative_paths>/<class>.md file location heuristic
+- The primary point into the Working Memory is agents/working/INDEX.md and recursive directory listing for keywords
+- agents/working/INDEX.md should summarize the most important general Working Memory and knowledge links.

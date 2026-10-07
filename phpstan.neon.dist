@@ -1,7 +1,12 @@
 parameters:
-    phpVersion: 80300 # PHP 8.3
+    phpVersion: 80100 # PHP 8.1
     level: 2
     bootstrapFiles:
         - tests/test_tools/phpstan-bootstrap.php
     paths:
         - src
+services:
+    -
+        class: Prado\PHPStan\DynamicMethodsClassReflectionExtension
+        tags:
+            - phpstan.broker.methodsClassReflectionExtension

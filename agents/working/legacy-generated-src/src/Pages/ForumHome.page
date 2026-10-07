@@ -1,0 +1,52 @@
+<%@ Page Language="PHP"
+         Title="Forum Home"
+         EnableViewState="true" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%=htmlspecialchars($this->getForumManager()->getSiteName())%></title>
+  <link rel="alternate" type="application/atom+xml"
+        title="<%=htmlspecialchars($this->getForumManager()->getSiteName())%> Feed"
+        href="<%=$this->getRSSUrl()%>">
+</head>
+<body class="forum-page forum-page--home">
+
+<header class="forum-header">
+  <div class="forum-header__inner">
+    <h1 class="forum-header__title">
+      <a href="<%=$this->getForumManager()->createUrl('forum/ForumHome')%>">
+        <%=htmlspecialchars($this->getForumManager()->getSiteName())%>
+      </a>
+    </h1>
+    <com:TForumSearch ID="HeaderSearch" ModuleID="forum" />
+  </div>
+</header>
+
+<main class="forum-main">
+  <div class="forum-layout">
+
+    <div class="forum-layout__primary">
+      <com:TForumBreadcrumbs ID="Breadcrumbs" ModuleID="forum" />
+      <com:TForumCategories  ID="Categories"  ModuleID="forum" />
+    </div>
+
+    <aside class="forum-layout__sidebar">
+      <com:TForumStats       ID="Stats"       ModuleID="forum" />
+      <com:TForumRecentPosts ID="RecentPosts" ModuleID="forum" Limit="8" />
+      <com:TForumTagCloud    ID="TagCloud"    ModuleID="forum" Limit="30" />
+    </aside>
+
+  </div>
+</main>
+
+<footer class="forum-footer">
+  <p>&copy; <%=date('Y')%>
+    <%=htmlspecialchars($this->getForumManager()->getSiteName())%>
+    &middot; <a href="<%=$this->getRSSUrl()%>">RSS Feed</a>
+  </p>
+</footer>
+
+</body>
+</html>

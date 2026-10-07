@@ -1,0 +1,6 @@
+<com:TContent ID=<%$ PluginContentId %>>
+	<com:Belisoful\Forum\Web\UI\BEForumToolbar />
+	<com:Belisoful\Forum\Web\UI\BEForumBreadcrumbs BoardID=<%= $this->Request["board"] %> />
+	<com:Belisoful\Forum\Web\UI\BEForumBoardHeader BoardID=<%= $this->Request["board"] %> />
+	<com:Belisoful\Forum\Web\UI\BEForumThreadList BoardID=<%= $this->Request["board"] %> />
+</com:TContent>

@@ -1,1 +1,103 @@
-my_error_condition = Prado Composer Extension threw an exception
+; PRADO Forum (Belisoful\Forum) error messages.
+; Format: key = message with {0}, {1}, ... placeholders.  Registered by
+; BEForumModule (TPluginModule) and used directly by the BEForum exceptions.
+
+; --- module and configuration -------------------------------------------
+forum_module_init_once					= BEForumModule can only be initialized once.
+forum_module_not_found					= No BEForumModule is available (module id '{0}'). Add the forum module to the application configuration.
+forum_property_unchangeable				= BEForumModule property '{0}' cannot be changed after the module has been initialized.
+forum_property_positive					= BEForumModule property '{0}' must be a positive integer; '{1}' was given.
+forum_property_non_negative				= BEForumModule property '{0}' must be zero or a positive integer; '{1}' was given.
+forum_property_word_invalid				= BEForumModule property '{0}' contains the invalid entry '{1}'; only letters, digits, underscores and hyphens are allowed.
+forum_table_prefix_invalid				= Table prefix '{0}' is invalid; only letters, digits and underscores are allowed.
+forum_content_format_invalid			= Content format '{0}' is not supported.
+forum_timezone_invalid					= '{0}' is not a valid timezone identifier.
+forum_class_invalid						= BEForumModule property '{0}' must name a subclass of {2}; '{1}' was given.
+forum_manager_class_invalid				= '{0}' is not a BEForumManager class.
+forum_feed_format_invalid				= Feed format '{0}' is invalid; use 'rss' or 'atom'.
+forum_feed_scope_invalid				= Feed scope '{0}' is invalid; use 'threads' or 'posts'.
+
+; --- schema --------------------------------------------------------------
+forum_schema_connection_required		= BEForumSchema needs a database connection.
+forum_schema_driver_unsupported			= Database driver '{0}' is not supported by the forum; use sqlite, mysql or pgsql.
+forum_schema_column_type_unknown		= Unknown schema column type '{0}'.
+forum_schema_table_unknown				= Unknown forum table '{0}'.
+
+; --- authorization -------------------------------------------------------
+forum_permission_denied					= You do not have permission to do this ({0}).
+forum_login_required					= Please log in to continue.
+forum_member_banned						= The account '{0}' is banned from the forum.
+forum_edit_window_closed				= The time allowed for editing this post has passed.
+forum_board_not_viewable				= You may not view the board '{0}'.
+forum_notification_not_owned			= This notification does not belong to you.
+
+; --- not found -----------------------------------------------------------
+forum_category_not_found				= Category #{0} was not found.
+forum_board_not_found					= Board #{0} was not found.
+forum_thread_not_found					= Thread #{0} was not found.
+forum_post_not_found					= Post #{0} was not found.
+forum_member_not_found					= Member '{0}' was not found.
+forum_attachment_not_found				= Attachment #{0} was not found.
+forum_report_not_found					= Report #{0} was not found.
+forum_attachment_missing				= The file '{0}' is missing from the attachment storage.
+forum_attachment_forbidden				= You may not attach files to this post.
+
+; --- validation ----------------------------------------------------------
+forum_name_required						= A name is required.
+forum_username_required					= A username is required.
+forum_reason_required					= Please give a reason.
+forum_field_too_long					= The field '{0}' must not exceed {1} characters ({2} given).
+forum_url_invalid						= '{0}' is not a valid http(s) URL.
+forum_email_invalid						= '{0}' is not a valid e-mail address.
+forum_slug_taken						= The slug '{0}' is already in use.
+forum_thread_title_required				= Please enter a title.
+forum_thread_title_too_long				= The title must not exceed {1} characters ({2} given).
+forum_thread_type_invalid				= '{0}' is not a valid thread type.
+forum_thread_type_moderator				= Only moderators may create threads of type '{0}'.
+forum_thread_locked						= This thread is locked; no replies are accepted.
+forum_thread_not_question				= Only question threads can have an accepted answer.
+forum_thread_move_same_board			= The thread is already in that board.
+forum_accepted_post_invalid				= The post cannot be accepted as the answer of this thread.
+forum_board_locked						= The board '{0}' is locked; new threads are not accepted.
+forum_board_not_empty					= The board '{0}' still contains threads and cannot be deleted.
+forum_board_has_children				= The board '{0}' still has sub boards and cannot be deleted.
+forum_board_parent_category				= A sub board must belong to the same category as its parent.
+forum_board_parent_cycle				= A board cannot be its own ancestor.
+forum_category_not_empty				= The category '{0}' still contains boards and cannot be deleted.
+forum_post_content_required				= Please write a message of at least {0} character(s).
+forum_post_content_too_long				= The message must not exceed {1} characters ({2} given).
+forum_reply_target_invalid				= The post being replied to does not belong to this thread.
+forum_purge_first_post					= The opening post cannot be removed on its own; delete the thread instead.
+forum_guest_name_taken					= The name '{0}' belongs to a registered member; please choose another name.
+forum_flood_control						= You are posting too quickly; please wait {0} second(s).
+forum_search_too_short					= Search terms must be at least {0} characters long.
+forum_too_many_tags						= A thread may carry at most {0} tags.
+forum_tag_name_required					= A tag name is required.
+forum_ban_self							= You cannot ban yourself.
+forum_ban_until_invalid					= '{0}' is not a valid ban end time.
+forum_pin_until_invalid					= '{0}' is not a valid pin end time.
+forum_subscription_type_invalid			= '{0}' is not a valid subscription target.
+forum_report_status_invalid				= '{0}' is not a valid report status.
+
+; --- reactions, polls, bookmarks, attachments ----------------------------
+forum_reactions_disabled				= Reactions are disabled.
+forum_reaction_type_invalid				= '{0}' is not an available reaction.
+forum_react_own_post					= You cannot react to your own post.
+forum_polls_disabled					= Polls are disabled.
+forum_poll_exists						= This thread already has a poll.
+forum_poll_question_required			= Please enter the poll question.
+forum_poll_options_required				= A poll needs at least two different options.
+forum_poll_too_many_options				= A poll may have at most {0} options.
+forum_poll_closes_invalid				= The poll closing time must be in the future.
+forum_poll_closed						= This poll is closed.
+forum_poll_choice_required				= Please choose an option.
+forum_poll_too_many_choices				= You may choose at most {0} option(s).
+forum_poll_option_invalid				= Option #{0} does not belong to this poll.
+forum_poll_already_voted				= You have already voted in this poll.
+forum_bookmarks_disabled				= Bookmarks are disabled.
+forum_attachments_disabled				= Attachments are disabled.
+forum_attachment_too_large				= The file '{0}' exceeds the maximum size of {1} bytes.
+forum_attachment_type_invalid			= The file '{0}' is not an allowed type; allowed types are: {1}.
+forum_attachment_upload_failed			= The upload of '{0}' failed.
+forum_attachment_path_invalid			= The attachment directory '{0}' cannot be created or written.
+forum_attachment_store_failed			= The attachment could not be stored at '{0}'.

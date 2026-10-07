@@ -1,0 +1,60 @@
+<%@ Page Language="PHP" Title="Search" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%=$this->Title%></title>
+</head>
+<body class="forum-page forum-page--search">
+
+<header class="forum-header">
+  <div class="forum-header__inner">
+    <h1 class="forum-header__title">
+      <a href="<%=$this->getForumManager()->createUrl('forum/ForumHome')%>">
+        <%=htmlspecialchars($this->getForumManager()->getSiteName())%>
+      </a>
+    </h1>
+  </div>
+</header>
+
+<main class="forum-main">
+  <div class="forum-layout">
+    <div class="forum-layout__primary">
+
+      <% if ($this->isTagBrowse() && $this->getTagRecord()): %>
+      <h2 class="forum-page-title">Tag: <%=htmlspecialchars($this->getTagRecord()->name)%></h2>
+
+      <% if (empty($this->getTagThreads())): %>
+      <p class="forum-empty">No threads with this tag.</p>
+      <% else: %>
+      <ul class="forum-thread-simple-list">
+        <% foreach ($this->getTagThreads() as $thread): %>
+        <li class="forum-thread-simple-list__item">
+          <a href="<%=$this->getThreadUrl($thread->id)%>"><%=htmlspecialchars($thread->title)%></a>
+          <span class="forum-thread-simple-list__meta">
+            <%=(int)$thread->reply_count%> replies &middot;
+            <%=htmlspecialchars(date('M j, Y', strtotime($thread->created_at)))%>
+          </span>
+        </li>
+        <% endforeach; %>
+      </ul>
+      <% endif; %>
+
+      <% else: %>
+      <h2 class="forum-page-title">Search Forum</h2>
+      <com:TForumSearch ID="SearchPortlet" ModuleID="forum" ShowResults="true" />
+      <% endif; %>
+
+    </div>
+    <aside class="forum-layout__sidebar">
+      <com:TForumTagCloud ID="TagCloud" ModuleID="forum" Limit="25" />
+    </aside>
+  </div>
+</main>
+
+<footer class="forum-footer">
+  <p>&copy; <%=date('Y')%> <%=htmlspecialchars($this->getForumManager()->getSiteName())%></p>
+</footer>
+</body>
+</html>

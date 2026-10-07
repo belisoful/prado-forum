@@ -1,14 +1,10 @@
-name: PRADO Composer Extension
+name: PRADO Forum
 on: [push, pull_request]
 jobs:
-  composerext:
-    name: PRADO Composer Extension
+  checks:
+    name: PHP ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
     services:
-      memcached:
-        image: memcached
-        ports:
-          - 11211:11211
       postgres:
         image: postgres
         env:
@@ -32,16 +28,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup PHP, with composer and extensions
-        uses: shivammathur/setup-php@v2 #https://github.com/shivammathur/setup-php
+        uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: ctype, dom, intl, json, mbstring, memcached, pdo_mysql, pdo_pgsql, pdo_sqlite, openssl, pcre, spl, zlib
+          extensions: ctype, dom, intl, json, mbstring, pdo_sqlite, pdo_mysql, pdo_pgsql, openssl, pcre, spl, zlib
           tools: php-cs-fixer, phpstan, cs2pr
 
-      - name: Validate composer.json and composer.lock
-        run: composer validate --strict
+      - name: Validate composer.json
+        run: composer validate --strict --no-check-lock
 
-      - name: Validate code syntax using php-cs-fixer
+      - name: Validate code style using php-cs-fixer
         run: php-cs-fixer fix -vvv --dry-run --using-cache=no --format=checkstyle | cs2pr
 
       - name: Get composer cache directory
@@ -49,33 +45,43 @@ jobs:
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
       - name: Validate code using phpstan
-        run: phpstan analyse --error-format=checkstyle | cs2pr
+        run: phpstan analyse --memory-limit=512M --error-format=checkstyle | cs2pr
+
+      - name: Run unit tests (SQLite)
+        run: composer unittest
 
       - name: Setup mysql service
         run: |
           sudo systemctl start mysql.service
           mysql -uroot -proot < ./tests/initdb_mysql.sql
 
+      - name: Run unit tests (MySQL)
+        run: composer unittest
+        env:
+          BEFORUM_TEST_DSN: mysql:host=127.0.0.1;dbname=beforum_unitest;charset=utf8mb4
+          BEFORUM_TEST_USER: beforum_unitest
+          BEFORUM_TEST_PASSWORD: beforum_unitest
+
       - name: Setup postgres service
         run: |
-          createdb -h 127.0.0.1 -U postgres prado_unitest
-          psql -h 127.0.0.1 -U postgres -a -w prado_unitest -f ./tests/initdb_pgsql.sql
+          createdb -h 127.0.0.1 -U postgres beforum_unitest
+          psql -h 127.0.0.1 -U postgres -a -w beforum_unitest -f ./tests/initdb_pgsql.sql
         env:
           PGPASSWORD: postgres
 
-      - name: Run Unit Tests
-        run: |
-          composer unittest
-
-
-
+      - name: Run unit tests (PostgreSQL)
+        run: composer unittest
+        env:
+          BEFORUM_TEST_DSN: pgsql:host=127.0.0.1;dbname=beforum_unitest
+          BEFORUM_TEST_USER: beforum_unitest
+          BEFORUM_TEST_PASSWORD: beforum_unitest

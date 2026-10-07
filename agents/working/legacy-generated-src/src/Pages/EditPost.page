@@ -1,0 +1,191 @@
+<%@ Page Language="PHP" Title="Edit Post" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%=$this->Title%></title>
+</head>
+<body class="forum-page forum-page--edit-post">
+
+<header class="forum-header">
+  <div class="forum-header__inner">
+    <h1 class="forum-header__title">
+      <a href="<%=$this->getForumManager()->createUrl('forum/ForumHome')%>">
+        <%=htmlspecialchars($this->getForumManager()->getSiteName())%>
+      </a>
+    </h1>
+    <com:TForumSearch ID="HeaderSearch" ModuleID="forum" />
+  </div>
+</header>
+
+<main class="forum-main">
+  <div class="forum-layout forum-layout--narrow">
+
+    <% if ($this->getError() !== ''): %>
+    <div class="forum-alert forum-alert--error" role="alert">
+      <%=htmlspecialchars($this->getError())%>
+    </div>
+    <% endif; %>
+
+    <% if ($this->getPost()): %>
+
+    <!-- Breadcrumbs -->
+    <nav class="forum-breadcrumbs" aria-label="Breadcrumb">
+      <ol class="forum-breadcrumbs__list">
+        <li><a href="<%=$this->getForumManager()->createUrl('forum/ForumHome')%>">Home</a></li>
+        <li aria-hidden="true">/</li>
+        <% if ($this->getThread()): %>
+        <li><a href="<%=$this->getThreadUrl()%>"><%=htmlspecialchars(mb_strimwidth($this->getThread()->title??'Thread',0,40,'…'))%></a></li>
+        <li aria-hidden="true">/</li>
+        <% endif; %>
+        <li aria-current="page">Edit Post #<%=(int)$this->getPost()->id%></li>
+      </ol>
+    </nav>
+
+    <div class="forum-edit-post">
+      <h2 class="forum-page-title">Edit Post</h2>
+
+      <!-- Original post info -->
+      <div class="forum-edit-post__meta" style="background:#f8f8f8;border:1px solid #e0e0e0;border-radius:4px;padding:.75rem 1rem;margin-bottom:1.25rem;font-size:.875rem;color:#666">
+        Post #<%=(int)$this->getPost()->id%>
+        by <strong><%=htmlspecialchars($this->getPost()->author ? $this->getPost()->author->username : 'Unknown')%></strong>
+        on <%=htmlspecialchars(date('F j, Y \a\t g:i a', strtotime($this->getPost()->created_at)))%>
+        <% if ($this->getPost()->edit_count > 0): %>
+        &bull; edited <%=(int)$this->getPost()->edit_count%> time(s)
+        <% endif; %>
+      </div>
+
+      <% if ($this->getCanEdit()): %>
+
+      <form method="post" action="" class="forum-form">
+
+        <!-- BBCode toolbar (cosmetic, enhanced by JS) -->
+        <div class="forum-bbcode-toolbar" aria-label="BBCode formatting">
+          <button type="button" onclick="bbWrap('content_raw','[b]','[/b]')" title="Bold" class="forum-bbcode-btn"><strong>B</strong></button>
+          <button type="button" onclick="bbWrap('content_raw','[i]','[/i]')" title="Italic" class="forum-bbcode-btn"><em>I</em></button>
+          <button type="button" onclick="bbWrap('content_raw','[u]','[/u]')" title="Underline" class="forum-bbcode-btn"><u>U</u></button>
+          <button type="button" onclick="bbWrap('content_raw','[s]','[/s]')" title="Strikethrough" class="forum-bbcode-btn"><s>S</s></button>
+          <span class="forum-bbcode-toolbar__sep" aria-hidden="true">|</span>
+          <button type="button" onclick="bbWrap('content_raw','[code]','[/code]')" title="Code" class="forum-bbcode-btn">Code</button>
+          <button type="button" onclick="bbWrap('content_raw','[quote]','[/quote]')" title="Quote" class="forum-bbcode-btn">Quote</button>
+          <button type="button" onclick="bbWrap('content_raw','[url]','[/url]')" title="Link" class="forum-bbcode-btn">URL</button>
+          <button type="button" onclick="bbWrap('content_raw','[img]','[/img]')" title="Image" class="forum-bbcode-btn">Img</button>
+          <button type="button" onclick="bbWrap('content_raw','[spoiler]','[/spoiler]')" title="Spoiler" class="forum-bbcode-btn">Spoiler</button>
+        </div>
+
+        <div class="forum-form__group">
+          <label class="forum-form__label" for="content_raw">Post Body (BBCode)</label>
+          <textarea
+            id="content_raw"
+            name="content_raw"
+            class="forum-form__textarea forum-form__textarea--tall"
+            rows="14"
+            required
+          ><%=htmlspecialchars($this->getPost()->content_raw ?? '')%></textarea>
+        </div>
+
+        <div class="forum-form__group">
+          <label class="forum-form__label" for="edit_note">Edit Note <span class="forum-form__hint">(optional — shown in post history)</span></label>
+          <input
+            type="text"
+            id="edit_note"
+            name="edit_note"
+            class="forum-form__input"
+            maxlength="200"
+            placeholder="Reason for edit…"
+          >
+        </div>
+
+        <div class="forum-form__actions">
+          <com:TButton ID="SaveBtn" Text="Save Changes" OnClick="saveEdit"
+            CssClass="forum-btn forum-btn--primary" />
+          <com:TButton ID="CancelBtn" Text="Cancel" OnClick="cancelEdit"
+            CssClass="forum-btn forum-btn--secondary" CausesValidation="false" />
+        </div>
+
+      </form>
+
+      <!-- Live preview -->
+      <div class="forum-edit-post__preview-section">
+        <h3 class="forum-edit-post__preview-title">Preview</h3>
+        <div id="edit-post-preview" class="forum-post__content"
+             style="min-height:4rem;padding:1rem;background:#fff;border:1px solid #e0e0e0;border-radius:4px;color:#555;font-style:italic">
+          Start typing to see a preview…
+        </div>
+      </div>
+
+      <% else: %>
+      <!-- Not editable (locked etc.) -->
+      <div class="forum-alert forum-alert--warning">
+        <p>This post cannot be edited: <%=htmlspecialchars($this->getError())%></p>
+        <a href="<%=$this->getThreadUrl()%>" class="forum-btn forum-btn--secondary">Back to Thread</a>
+      </div>
+      <% endif; %>
+
+    </div>
+
+    <% else: %>
+    <p class="forum-error">Post not found.</p>
+    <% endif; %>
+
+  </div>
+</main>
+
+<footer class="forum-footer">
+  <p>&copy; <%=date('Y')%> <%=htmlspecialchars($this->getForumManager()->getSiteName())%></p>
+</footer>
+
+<script>
+// BBCode wrap helper
+function bbWrap(id, open, close) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var start = el.selectionStart, end = el.selectionEnd;
+  var sel = el.value.substring(start, end);
+  el.value = el.value.substring(0, start) + open + sel + close + el.value.substring(end);
+  el.selectionStart = start + open.length;
+  el.selectionEnd   = end   + open.length;
+  el.focus();
+  updatePreview();
+}
+
+// Debounced live preview via server-side strip of tags (plain text fallback)
+var previewTimer = null;
+var textarea = document.getElementById('content_raw');
+var preview  = document.getElementById('edit-post-preview');
+
+function updatePreview() {
+  if (!textarea || !preview) return;
+  var raw = textarea.value.trim();
+  if (raw === '') {
+    preview.innerHTML = '<span style="color:#999;font-style:italic">Start typing to see a preview…</span>';
+    return;
+  }
+  // Client-side minimal BBCode → HTML for instant feedback
+  var html = raw
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\[b\]([\s\S]*?)\[\/b\]/gi,'<strong>$1</strong>')
+    .replace(/\[i\]([\s\S]*?)\[\/i\]/gi,'<em>$1</em>')
+    .replace(/\[u\]([\s\S]*?)\[\/u\]/gi,'<u>$1</u>')
+    .replace(/\[s\]([\s\S]*?)\[\/s\]/gi,'<s>$1</s>')
+    .replace(/\[code\]([\s\S]*?)\[\/code\]/gi,'<pre><code>$1</code></pre>')
+    .replace(/\[url=([^\]]+)\]([\s\S]*?)\[\/url\]/gi,'<a href="$1" rel="nofollow noopener" target="_blank">$2</a>')
+    .replace(/\[url\]([\s\S]*?)\[\/url\]/gi,'<a href="$1" rel="nofollow noopener" target="_blank">$1</a>')
+    .replace(/\[quote\]([\s\S]*?)\[\/quote\]/gi,'<blockquote>$1</blockquote>')
+    .replace(/\[spoiler\]([\s\S]*?)\[\/spoiler\]/gi,'<details><summary>Spoiler</summary><div>$1</div></details>')
+    .replace(/\n/g,'<br>');
+  preview.innerHTML = html;
+}
+
+if (textarea) {
+  textarea.addEventListener('input', function() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(updatePreview, 250);
+  });
+  // Initial preview for existing content
+  updatePreview();
+}
+</script>
+</body>
+</html>

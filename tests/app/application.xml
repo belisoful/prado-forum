@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<application id="beforum-tests" mode="Debug">
+	<paths>
+		<using namespace="Prado.Web.UI.WebControls.*" />
+	</paths>
+	<parameters>
+		<parameter id="PluginContentId" value="Main" />
+	</parameters>
+</application>

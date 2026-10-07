@@ -1,0 +1,56 @@
+<%@ Page Language="PHP" Title="Board" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%=$this->Title%></title>
+</head>
+<body class="forum-page forum-page--board">
+
+<header class="forum-header">
+  <div class="forum-header__inner">
+    <h1 class="forum-header__title">
+      <a href="<%=$this->getForumManager()->createUrl('forum/ForumHome')%>">
+        <%=htmlspecialchars($this->getForumManager()->getSiteName())%>
+      </a>
+    </h1>
+    <com:TForumSearch ID="HeaderSearch" ModuleID="forum" />
+  </div>
+</header>
+
+<main class="forum-main">
+  <div class="forum-layout">
+    <div class="forum-layout__primary">
+
+      <com:TForumBreadcrumbs ID="Breadcrumbs" ModuleID="forum" />
+
+      <% if ($this->getBoard()): %>
+      <div class="forum-board-header">
+        <h2 class="forum-board-header__name"><%=htmlspecialchars($this->getBoard()->name)%></h2>
+        <% if ($this->getBoard()->description): %>
+        <p class="forum-board-header__desc"><%=htmlspecialchars($this->getBoard()->description)%></p>
+        <% endif; %>
+      </div>
+
+      <com:TForumThreadList ID="ThreadList" ModuleID="forum"
+        BoardId="<%=(int)$this->getRequest()->getParam('id',0)%>"
+        Page="<%=$this->getCurrentPage()%>" />
+
+      <% else: %>
+      <p class="forum-error">Board not found.</p>
+      <% endif; %>
+
+    </div>
+    <aside class="forum-layout__sidebar">
+      <com:TForumStats    ID="Stats"       ModuleID="forum" />
+      <com:TForumRecentPosts ID="RecentPosts" ModuleID="forum" Limit="6" />
+    </aside>
+  </div>
+</main>
+
+<footer class="forum-footer">
+  <p>&copy; <%=date('Y')%> <%=htmlspecialchars($this->getForumManager()->getSiteName())%></p>
+</footer>
+</body>
+</html>
