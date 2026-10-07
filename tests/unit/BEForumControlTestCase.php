@@ -13,9 +13,11 @@ use Prado\IO\TTextWriter;
 use Prado\Prado;
 use Prado\Web\Services\TPageService;
 use Prado\Web\TAssetManager;
+use Prado\Web\THttpResponse;
 use Prado\Exceptions\TExitException;
 use Prado\IO\IDataRenderer;
 use Prado\Web\UI\TCommandEventParameter;
+use Prado\Web\UI\ActiveControls\TCallbackResponseAdapter;
 use Prado\Web\UI\TControl;
 use Prado\Web\UI\THtmlWriter;
 use Prado\Web\UI\WebControls\TRepeater;
@@ -157,6 +159,66 @@ abstract class BEForumControlTestCase extends BEForumTestCase
 			return $e;
 		}
 		return null;
+	}
+
+	/**
+	 * Runs a real callback request: the control is rendered once (the GET
+	 * request, which yields the page state), then a fresh control tree is run
+	 * through the callback lifecycle targeting an active control, as the
+	 * browser would.  The response adapter and error handler installed by the
+	 * callback are removed afterwards.
+	 * @param callable $factory `function(): BEForumControl` creating the control (called twice)
+	 * @param callable $target `function(BEForumControl $control): TControl` returning the active control to trigger
+	 * @param array<string, mixed> $params the request parameters
+	 * @param mixed $parameter the callback parameter
+	 * @param null|callable $between `function(): void` run between the GET render and the callback (state changes by others)
+	 * @return array{control: BEForumControl, page: TPage, actions: array, content: string, redirect: null|string, html: string} the callback result
+	 */
+	protected function runCallback(callable $factory, callable $target, array $params = [], $parameter = '', ?callable $between = null): array
+	{
+		$first = $factory();
+		$html = $this->render($first, $params);
+		self::assertSame(1, preg_match('/name="' . TPage::FIELD_PAGESTATE . '"[^>]*value="([^"]*)"/', $html, $match), 'the GET response carries the page state');
+		$uniqueId = $target($first)->getUniqueID();
+		if ($between !== null) {
+			$between();
+		}
+		$app = $this->getApp();
+		$response = $app->getResponse();
+		$errorHandler = $app->getErrorHandler();
+		$this->setRequest($params + [
+			TPage::FIELD_PAGESTATE => html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+			TPage::FIELD_CALLBACK_TARGET => $uniqueId,
+			TPage::FIELD_CALLBACK_PARAMETER => json_encode($parameter),
+		]);
+		$control = $factory();
+		$page = $this->createPage($control);
+		$content = '';
+		$redirect = null;
+		try {
+			$page->run(new THtmlWriter(new TTextWriter()));
+		} finally {
+			$adapter = $response->getAdapter();
+			if ($adapter instanceof TCallbackResponseAdapter) {
+				$redirect = $adapter->getRedirectedUrl();
+				$writers = new ReflectionProperty(TCallbackResponseAdapter::class, '_writers');
+				foreach ($writers->getValue($adapter) as $writer) {
+					$content .= $writer->flush();
+				}
+			}
+			// the callback adapter must not leak into later tests (it swallows redirects)
+			$adapterProperty = new ReflectionProperty(THttpResponse::class, '_adapter');
+			$adapterProperty->setValue($response, null);
+			$app->setErrorHandler($errorHandler);
+		}
+		return [
+			'control' => $control,
+			'page' => $page,
+			'actions' => $page->getCallbackClient()->getClientFunctionsToExecute(),
+			'content' => $content,
+			'redirect' => $redirect,
+			'html' => $html,
+		];
 	}
 
 	/**

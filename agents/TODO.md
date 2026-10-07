@@ -1,6 +1,5 @@
 # Open items
 
-- Reactions, subscriptions and bookmarks use full postbacks; converting `BEForumReactionBar`, `BEForumSubscribeButton` and the bookmark action to `TActive*` callbacks would avoid page reloads.
 - The built-in search is `LIKE` based; a MySQL FULLTEXT / PostgreSQL tsvector backend can be plugged in through `dySearchCriteria` and shipped as an optional behavior.
 - E-mail delivery of notifications is left to the host (`onNotification` event); a reference `TBehavior` sending mail would be a useful example.
 - `TPermissionsManager` registers each permission once per application; with several `BEForumModule` instances the first initialized instance defines the preset rules (`BEForumRoleRule` merges the admin/moderator lists of all initialized modules).

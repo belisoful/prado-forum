@@ -24,6 +24,7 @@ use Prado\Web\UI\WebControls\TRepeaterCommandEventParameter;
  * {@see setSummary}/{@see setMemberReaction}; after a postback the bar loads
  * them itself.
  *
+ * @property \Prado\Web\UI\ActiveControls\TActivePanel $Panel
  * @property \Prado\Web\UI\WebControls\TRepeater $Buttons
  * @property \Prado\Web\UI\WebControls\TRepeater $Counts
  * @property \Prado\Web\UI\WebControls\TLabel $Error
@@ -33,6 +34,9 @@ use Prado\Web\UI\WebControls\TRepeaterCommandEventParameter;
  */
 class BEForumReactionBar extends BEForumControl
 {
+	/** @var bool whether this bar handled the current callback and must be re-rendered */
+	private bool $_refresh = false;
+
 	/** @var array<string, string> default symbols keyed by reaction type */
 	public const DEFAULT_SYMBOLS = ['like' => '&#128077;', 'love' => '&#10084;&#65039;', 'laugh' => '&#128514;', 'wow' => '&#128558;', 'sad' => '&#128546;', 'angry' => '&#128545;', 'thanks' => '&#128591;'];
 
@@ -186,6 +190,9 @@ class BEForumReactionBar extends BEForumControl
 			$this->_summary = null;
 			$this->_memberReaction = null;
 		});
+		// the buttons are active controls: a callback refreshes only this bar
+		$this->_refresh = true;
+		$this->updateOnCallback($this->Panel);
 	}
 
 	/**
@@ -211,6 +218,10 @@ class BEForumReactionBar extends BEForumControl
 	public function onPreRender($param)
 	{
 		parent::onPreRender($param);
+		if ($this->getIsCallback() && !$this->_refresh) {
+			// another control's callback: keep the buttons restored from view state
+			return;
+		}
 		$rows = $this->getRows();
 		$canReact = $this->getCanReact();
 		if (!$canReact) {

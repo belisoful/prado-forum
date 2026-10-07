@@ -1,10 +1,10 @@
-<div class="<%= $this->wrapperCss('reactions') %>">
+<com:TActivePanel ID="Panel" CssClass=<%= $this->wrapperCss('reactions') %>>
 	<com:TRepeater ID="Buttons" OnItemCommand="reactionCommand">
 		<prop:ItemTemplate>
-			<com:TLinkButton CssClass=<%# $this->TemplateControl->css('reaction', $this->Data['active'] ? 'active' : null) %> CommandName=<%# $this->Data['type'] %> CausesValidation="false" ToolTip=<%# $this->Data['label'] %>>
+			<com:TActiveLinkButton CssClass=<%# $this->TemplateControl->css('reaction', $this->Data['active'] ? 'active' : null) %> CommandName=<%# $this->Data['type'] %> CausesValidation="false" ToolTip=<%# $this->Data['label'] %>>
 				<span class="<%# $this->TemplateControl->css('reaction-symbol') %>"><%# $this->Data['symbol'] %></span>
 				<span class="<%# $this->TemplateControl->css('reaction-count') %>"><%# $this->Data['count'] > 0 ? $this->Data['count'] : '' %></span>
-			</com:TLinkButton>
+			</com:TActiveLinkButton>
 		</prop:ItemTemplate>
 	</com:TRepeater>
 	<com:TRepeater ID="Counts">
@@ -13,4 +13,4 @@
 		</prop:ItemTemplate>
 	</com:TRepeater>
 	<com:TLabel ID="Error" CssClass=<%= $this->css('error') %> Visible="false" />
-</div>
+</com:TActivePanel>

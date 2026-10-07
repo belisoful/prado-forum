@@ -140,6 +140,8 @@
 
 /* Reactions */
 .beforum-reactions { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+.beforum-subscribe { display: inline-block; }
+.beforum-post-notice:empty { display: none; }
 .beforum-reaction { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.1rem 0.5rem; border: 1px solid var(--beforum-border); border-radius: 999px; background: var(--beforum-surface); font-size: 0.9em; text-decoration: none !important; }
 .beforum-reaction--active { border-color: var(--beforum-primary); background: #dbeafe; }
 .beforum-reaction-count:empty { display: none; }

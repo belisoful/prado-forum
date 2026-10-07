@@ -52,6 +52,9 @@ class BEForumBookmarkList extends BEForumControl
 	{
 		parent::onPreRender($param);
 		$forum = $this->getForum();
+		if ($this->getIsCallback()) {
+			return;
+		}
 		[$bookmarks, $pagination] = $forum->getBookmarks()->listBookmarks(null, $this->getRequestedPage());
 		$posts = $forum->getPosts()->getPostsByIds(array_map(fn (BEForumBookmark $bookmark) => (int) $bookmark->post_id, $bookmarks));
 		$ordered = [];

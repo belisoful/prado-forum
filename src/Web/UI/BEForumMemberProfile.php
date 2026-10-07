@@ -253,7 +253,7 @@ class BEForumMemberProfile extends BEForumControl
 			$this->BadgeList->setDataSource($badges);
 			$this->BadgeList->dataBind();
 		}
-		if ($this->getRecentPostCount() > 0) {
+		if ($this->getRecentPostCount() > 0 && !$this->getIsCallback()) {
 			[$posts] = $forum->getPosts()->getPostsByMember($member, 1, $this->getRecentPostCount());
 			$this->bindRepeater('Posts', $this->buildPostRows($posts, true, false));
 		}

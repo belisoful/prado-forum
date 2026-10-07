@@ -149,6 +149,10 @@ class BEForumPostList extends BEForumControl
 	public function onPreRender($param)
 	{
 		parent::onPreRender($param);
+		if ($this->getIsCallback()) {
+			// the rows restored from view state host the active controls of the callback
+			return;
+		}
 		$thread = $this->getThread();
 		$page = $this->getRequestedPage();
 		[$posts, $pagination] = $this->getForum()->getPosts()->listPosts($thread, $page, $this->getPageSize() > 0 ? $this->getPageSize() : null);

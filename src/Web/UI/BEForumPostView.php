@@ -44,10 +44,11 @@ use Belisoful\Forum\Security\BEForumPermissions;
  * @property \Prado\Web\UI\WebControls\TLinkButton $Approve
  * @property \Prado\Web\UI\WebControls\TLinkButton $Accept
  * @property \Prado\Web\UI\WebControls\TLinkButton $Unaccept
- * @property \Prado\Web\UI\WebControls\TLinkButton $Bookmark
+ * @property \Prado\Web\UI\ActiveControls\TActiveLinkButton $Bookmark
  * @property \Prado\Web\UI\WebControls\TLinkButton $Report
  * @property \Prado\Web\UI\WebControls\TPanel $ReportPanel
  * @property \Prado\Web\UI\WebControls\TTextBox $ReportReason
+ * @property \Prado\Web\UI\ActiveControls\TActivePanel $Notice
  * @property \Prado\Web\UI\WebControls\TLabel $Error
  *
  * @author Brad Anderson <belisoful@icloud.com>
@@ -236,6 +237,10 @@ class BEForumPostView extends BEForumItemRenderer
 	public function onPreRender($param)
 	{
 		parent::onPreRender($param);
+		if ($this->getData() === null) {
+			// a callback keeps the rows restored from view state; nothing is re-rendered but the active controls
+			return;
+		}
 		$this->configureActions();
 	}
 
@@ -339,7 +344,20 @@ class BEForumPostView extends BEForumItemRenderer
 	 */
 	public function bookmarkClicked($sender, $param): void
 	{
-		$this->perform(fn () => $this->getForum()->getBookmarks()->toggle($this->getForum()->getPosts()->getPost($this->getPostID())));
+		if (!$this->getIsCallback()) {
+			$this->perform(fn () => $this->getForum()->getBookmarks()->toggle($this->getForum()->getPosts()->getPost($this->getPostID())));
+			return;
+		}
+		// a callback updates the button in place instead of reloading the page
+		try {
+			$bookmarked = $this->getForum()->getBookmarks()->toggle($this->getForum()->getPosts()->getPost($this->getPostID()));
+			$this->Bookmark->setText($this->te($bookmarked ? 'Remove bookmark' : 'Bookmark'));
+		} catch (BEForumValidationException | BEForumForbiddenException | BEForumNotFoundException $e) {
+			$this->_error = $e->getMessage();
+			$this->Error->setText($this->e($e->getMessage()));
+			$this->Error->setVisible(true);
+			$this->updateOnCallback($this->Notice);
+		}
 	}
 
 	/**

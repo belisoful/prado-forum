@@ -111,6 +111,9 @@ class BEForumSearchResults extends BEForumControl
 	public function onPreRender($param)
 	{
 		parent::onPreRender($param);
+		if ($this->getIsCallback()) {
+			return;
+		}
 		$query = $this->getQuery();
 		$this->PostResults->setVisible(false);
 		$this->ThreadResults->setVisible(false);

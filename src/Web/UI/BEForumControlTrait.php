@@ -16,6 +16,7 @@ use Belisoful\Forum\Exceptions\BEForumConfigurationException;
 use Belisoful\Forum\Util\BEForumTime;
 use Belisoful\Forum\Web\BEForumUrlBuilder;
 use Prado\Prado;
+use Prado\Web\UI\ActiveControls\TActivePanel;
 use Prado\Security\IUser;
 use Prado\TPropertyValue;
 
@@ -282,6 +283,29 @@ trait BEForumControlTrait
 			return '<span class="' . $this->css('member-name', 'guest') . '">' . $this->e($fallback ?? $this->getForum()->getGuestName()) . '</span>';
 		}
 		return '<a class="' . $this->css('member-name') . '" href="' . $this->e($this->getUrls()->member($member)) . '">' . $this->e($member->getDisplayName()) . '</a>';
+	}
+
+	/**
+	 * @return bool whether the current request is an AJAX callback of an active control
+	 */
+	public function getIsCallback(): bool
+	{
+		$page = $this->getPage();
+		return $page !== null && $page->getIsCallback();
+	}
+
+	/**
+	 * Re-renders an active panel in the callback response so that the browser
+	 * receives the new state without a page reload.  The panel is rendered
+	 * after pre-render (when the view models are bound); on a normal postback
+	 * the page is rendered as a whole and nothing happens here.
+	 * @param TActivePanel $panel the panel to refresh
+	 */
+	protected function updateOnCallback(TActivePanel $panel): void
+	{
+		if ($this->getIsCallback()) {
+			$panel->render($this->getResponse()->createHtmlWriter());
+		}
 	}
 
 	/**

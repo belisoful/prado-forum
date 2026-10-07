@@ -136,6 +136,7 @@ abstract class BEForumControl extends TTemplateControl
 		$this->getResponse()->redirect($url);
 	}
 
+
 	/**
 	 * Ends the request after output has been written (file downloads).
 	 * @throws TExitException always

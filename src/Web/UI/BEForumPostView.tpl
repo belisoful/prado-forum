@@ -27,7 +27,7 @@
 				<com:TLinkButton ID="Approve" CssClass=<%= $this->css('action', 'primary') %> Text=<%= $this->te('Approve') %> OnClick="approveClicked" CausesValidation="false" />
 				<com:TLinkButton ID="Accept" CssClass=<%= $this->css('action') %> Text=<%= $this->te('Accept answer') %> OnClick="acceptClicked" CausesValidation="false" />
 				<com:TLinkButton ID="Unaccept" CssClass=<%= $this->css('action') %> Text=<%= $this->te('Unaccept answer') %> OnClick="unacceptClicked" CausesValidation="false" />
-				<com:TLinkButton ID="Bookmark" CssClass=<%= $this->css('action') %> OnClick="bookmarkClicked" CausesValidation="false" />
+				<com:TActiveLinkButton ID="Bookmark" CssClass=<%= $this->css('action') %> OnClick="bookmarkClicked" CausesValidation="false" />
 				<com:TLinkButton ID="Report" CssClass=<%= $this->css('action') %> Text=<%= $this->te('Report') %> OnClick="reportClicked" CausesValidation="false" />
 			</div>
 			<com:TPanel ID="ReportPanel" CssClass=<%= $this->css('report-form') %> Visible="false">
@@ -37,7 +37,7 @@
 				<com:TLinkButton CssClass=<%= $this->css('button', 'small') %> Text=<%= $this->te('Send report') %> OnClick="sendReportClicked" CausesValidation="false" />
 				<com:TLinkButton CssClass=<%= $this->css('button', 'link') %> Text=<%= $this->te('Cancel') %> OnClick="cancelReportClicked" CausesValidation="false" />
 			</com:TPanel>
-			<com:TLabel ID="Error" CssClass=<%= $this->css('error') %> Visible="false" />
+			<com:TActivePanel ID="Notice" CssClass=<%= $this->css('post-notice') %>><com:TLabel ID="Error" CssClass=<%= $this->css('error') %> Visible="false" /></com:TActivePanel>
 		</footer>
 	</div>
 </article>

@@ -24,7 +24,8 @@ use Prado\TPropertyValue;
  * <com:Belisoful\Forum\Web\UI\BEForumSubscribeButton TargetType="thread" TargetID="12" />
  * ```
  *
- * @property \Prado\Web\UI\WebControls\TLinkButton $Toggle
+ * @property \Prado\Web\UI\ActiveControls\TActivePanel $Panel
+ * @property \Prado\Web\UI\ActiveControls\TActiveLinkButton $Toggle
  * @property \Prado\Web\UI\WebControls\TLabel $Error
  *
  * @author Brad Anderson <belisoful@icloud.com>
@@ -90,6 +91,8 @@ class BEForumSubscribeButton extends BEForumControl
 		$this->attempt(function (): void {
 			$this->getForum()->getSubscriptions()->toggle($this->getTargetType(), $this->getTargetID());
 		});
+		// with JavaScript the button toggles through a callback that refreshes only itself
+		$this->updateOnCallback($this->Panel);
 	}
 
 	/**
