@@ -55,6 +55,17 @@ abstract class BEForumTestCase extends TestCase
 	/** @var string the temporary SQLite file of the current test */
 	protected string $dbFile = '';
 
+	/** @var null|string the external DSN whose schema has been installed by this process */
+	private static ?string $externalSchemaReady = null;
+
+	/**
+	 * @var null|TDbConnection the connection shared by every test of an external DSN: PRADO's
+	 * Active Record gateway caches its command builder per connection string together with the
+	 * first connection object it saw, so a new connection per test would make records and raw
+	 * manager commands use two different database sessions (and deadlock on row locks)
+	 */
+	private static ?TDbConnection $externalConnection = null;
+
 	/**
 	 * Creates the database, schema and module.
 	 */
@@ -66,12 +77,21 @@ abstract class BEForumTestCase extends TestCase
 		}
 		$dsn = (string) getenv('BEFORUM_TEST_DSN');
 		if ($dsn !== '') {
-			// integration run against MySQL or PostgreSQL: recreate the schema for every test
-			$this->db = new TDbConnection($dsn, (string) getenv('BEFORUM_TEST_USER'), (string) getenv('BEFORUM_TEST_PASSWORD'));
+			// integration run against MySQL or PostgreSQL: the schema is created once per process
+			// (DDL is slow there) and the tables are emptied before every test
+			if (self::$externalConnection === null || self::$externalSchemaReady !== $dsn) {
+				self::$externalConnection = new TDbConnection($dsn, (string) getenv('BEFORUM_TEST_USER'), (string) getenv('BEFORUM_TEST_PASSWORD'));
+			}
+			$this->db = self::$externalConnection;
 			$this->db->setActive(true);
 			$schema = new BEForumSchema($this->db, 'forum_');
-			$schema->drop();
-			$schema->install();
+			if (self::$externalSchemaReady !== $dsn || !$schema->getIsInstalled() || count($schema->findExistingTables()) < count($schema->getTableNames())) {
+				$schema->drop();
+				$schema->install();
+				self::$externalSchemaReady = $dsn;
+			} else {
+				$schema->clear();
+			}
 		} else {
 			// TActiveRecordGateway caches metadata per connection string, so every test needs its own file
 			$this->dbFile = tempnam(sys_get_temp_dir(), 'beforum-test-');
@@ -109,9 +129,12 @@ abstract class BEForumTestCase extends TestCase
 		BEForumTime::freeze(null);
 		$app->setGlobalState(BEForumModule::STATE_SCHEMA_VERSION . ':forum_', null);
 		$this->logout();
-		$this->db->setActive(false);
-		if ($this->dbFile !== '' && is_file($this->dbFile)) {
-			@unlink($this->dbFile);
+		if ($this->dbFile !== '') {
+			// the external connection stays open for the next test, see $externalConnection
+			$this->db->setActive(false);
+			if (is_file($this->dbFile)) {
+				@unlink($this->dbFile);
+			}
 		}
 		parent::tearDown();
 	}

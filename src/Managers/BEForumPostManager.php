@@ -828,7 +828,7 @@ class BEForumPostManager extends BEForumManager
 			return [];
 		}
 		$this->getDbConnection();
-		return $this->indexById(BEForumPost::finder()->findAll($this->inCondition('id', $ids)));
+		return $this->indexById(BEForumPost::finder()->findAll(BEForumPost::criteria($this->inCondition('id', $ids), [], ['id' => 'asc'])));
 	}
 
 	/**

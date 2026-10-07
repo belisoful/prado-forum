@@ -193,7 +193,7 @@ class BEForumMemberManager extends BEForumManager
 			return [];
 		}
 		$this->getDbConnection();
-		return $this->indexById(BEForumMember::finder()->findAll($this->inCondition('id', $ids)));
+		return $this->indexById(BEForumMember::finder()->findAll(BEForumMember::criteria($this->inCondition('id', $ids), [], ['id' => 'asc'])));
 	}
 
 	/**

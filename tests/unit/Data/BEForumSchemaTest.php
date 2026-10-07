@@ -58,6 +58,22 @@ class BEForumSchemaTest extends TestCase
 		self::assertFalse($schema->getIsInstalled());
 	}
 
+	public function testClearEmptiesTablesAndKeepsTheSchema(): void
+	{
+		$connection = $this->connection();
+		$schema = new BEForumSchema($connection, 'c_');
+		$schema->install();
+		$connection->createCommand("INSERT INTO c_categories (name, slug, position, board_count, created_at, updated_at) VALUES ('A', 'a', 1, 0, '2026-01-01 00:00:00', '2026-01-01 00:00:00')")->execute();
+		self::assertSame(1, (int) $connection->createCommand('SELECT COUNT(*) FROM c_categories')->queryScalar());
+		self::assertSame(count($schema->getTableNames()) - 1, $schema->clear());
+		self::assertSame(0, (int) $connection->createCommand('SELECT COUNT(*) FROM c_categories')->queryScalar());
+		self::assertTrue($schema->getIsInstalled(), 'meta survives a clear');
+		$connection->createCommand("INSERT INTO c_categories (name, slug, position, board_count, created_at, updated_at) VALUES ('B', 'b', 1, 0, '2026-01-01 00:00:00', '2026-01-01 00:00:00')")->execute();
+		self::assertSame(1, (int) $connection->createCommand('SELECT id FROM c_categories')->queryScalar(), 'SQLite ids restart after a clear');
+		$schema->drop();
+		self::assertSame(0, $schema->clear(), 'nothing to clear without tables');
+	}
+
 	public function testUpgradeFromNothingInstalls(): void
 	{
 		$schema = new BEForumSchema($this->connection());

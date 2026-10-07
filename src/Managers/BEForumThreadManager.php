@@ -442,7 +442,7 @@ class BEForumThreadManager extends BEForumManager
 			return [];
 		}
 		$this->getDbConnection();
-		return $this->indexById(BEForumThread::finder()->findAll($this->inCondition('id', $ids)));
+		return $this->indexById(BEForumThread::finder()->findAll(BEForumThread::criteria($this->inCondition('id', $ids), [], ['id' => 'asc'])));
 	}
 
 	/**

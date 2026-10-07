@@ -1014,4 +1014,33 @@ class BEForumSchema extends TComponent
 			$connection->createCommand($statement)->execute();
 		}
 	}
+
+	/**
+	 * Deletes every row of every forum table except the meta table, children
+	 * first so that foreign keys are satisfied, and resets SQLite sequences.
+	 * This is much cheaper than {@see drop} and {@see install} when a fresh
+	 * database is needed repeatedly (tests, demo resets) and keeps the schema.
+	 * @return int the number of tables cleared
+	 */
+	public function clear(): int
+	{
+		$connection = $this->ensureConnection();
+		$driver = $this->getDriverName();
+		$cleared = 0;
+		foreach (array_reverse($this->getTableNames()) as $table) {
+			if ($table === 'meta' || !$this->tableExists($table)) {
+				continue;
+			}
+			$connection->createCommand('DELETE FROM ' . static::quoteIdentifier($this->getTableName($table), $driver))->execute();
+			$cleared++;
+		}
+		if ($driver === 'sqlite' && $cleared > 0) {
+			try {
+				$connection->createCommand('DELETE FROM sqlite_sequence')->execute();
+			} catch (\Throwable $e) {
+				// the sequence table only exists once an AUTOINCREMENT table has rows
+			}
+		}
+		return $cleared;
+	}
 }

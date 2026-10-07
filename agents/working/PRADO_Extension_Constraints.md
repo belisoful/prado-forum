@@ -13,6 +13,7 @@
 - Table name resolution: constant `TABLE` first, then method `table()`, then lowercase class name. `BEForumRecord::table()` prepends the configured prefix; records must not define `TABLE`.
 - `TActiveRecord::getDbConnection()` falls back to `TActiveRecordManager::getInstance()->getDbConnection()`. `BEForumRecord` overrides it to use the forum module connection so the host application's AR configuration is untouched.
 - Relation finders are created with `TActiveRecord::finder($class)`; `finder()` caches one instance per class.
+- `TActiveRecordGateway::getCommand()` caches the command builder **per connection string together with the first `TDbConnection` object** it saw. Creating a second `TDbConnection` with the same DSN (tests, reconfiguration) makes record writes use the first object's session while raw commands use the second: two database sessions, broken transactions and row-lock deadlocks (`SELECT ... FOR UPDATE`). Tests therefore share one connection per external DSN and use a unique SQLite file per test.
 - `$RELATIONS` entries: `[self::BELONGS_TO, Class::class, 'fk_column']`, `[self::HAS_MANY, Class::class, 'fk_column']`.
 - `TSqlCriteria`: `new TActiveRecordCriteria('cond', [params])`, `->OrdersBy`, `->Limit`, `->Offset`. `count()`, `findAll()`, `find()`, `findByPk()`, `findAllByPks()`.
 - Save raises `OnInsert`/`OnUpdate`/`OnDelete` events with `TActiveRecordChangeEventParameter` (`IsValid`).
